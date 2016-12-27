@@ -194,10 +194,10 @@ class qa_html_theme_layer extends qa_html_theme_base {
 		qa_html_theme_base::head_script();
 		if ( ($this->template=='question') and (qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN) ){
 			$variables = '';
-			$variables .= 'useo_ajax_url = "' . USEO_URL . '/ajax.php";';
+			$variables .= 'useo_ajax_url = "' . QA_HTML_THEME_LAYER_URLTOROOT . 'ajax.php";';
 			$variables .= 'useo_postid = ' . $this->content['q_view']['raw']['postid'] .';';
 			$this->output('<script>' . $variables . '</script>');
-			$this->output('<script src="'.USEO_URL.'/include/seo-forms.js" type="text/javascript"></script>');
+			$this->output('<script src="' . QA_HTML_THEME_LAYER_URLTOROOT . 'include/seo-forms.js" type="text/javascript"></script>');
 		}
 	}
 
