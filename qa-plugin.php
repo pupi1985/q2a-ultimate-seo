@@ -1,18 +1,5 @@
 <?php
-        
-/*              
-    Plugin Name: Q2A Ultimate SEO
-    Plugin URI: https://github.com/Towhidn/Q2A-Ultimate-SEO/
-    Plugin Update Check URI:  https://github.com/Towhidn/Q2A-Ultimate-SEO/raw/master/q2a-ultimate-seo/qa-plugin.php
-    Plugin Description: SEO Links for Question2Answer
-    Plugin Version: 1.3
-    Plugin Date: 2014-24-1
-    Plugin Author: QA-Themes.com
-    Plugin Author URI: http://QA-Themes.com
-    Plugin License: copy lifted                           
-    Plugin Minimum Question2Answer Version: 1.5
-*/                      
-                        
+
     if (!defined('QA_VERSION')) { // don't allow this page to be requested directly from browser
                     header('Location: ../../');
                     exit;   
