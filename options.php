@@ -1,5 +1,5 @@
 <?php
-/* don't allow this page to be requested directly from browser */	
+/* don't allow this page to be requested directly from browser */
 if (!defined('QA_VERSION')) {
 		header('Location: /');
 		exit;
@@ -8,7 +8,7 @@ class useo_options {
 	var $directory;
 	var $urltoroot;
 	var $saved;
-	
+
 	function load_module($directory, $urltoroot) {
 		$this->directory=$directory;
 		$this->urltoroot=$urltoroot;
@@ -19,7 +19,7 @@ class useo_options {
 			return true;
 		return false;
 	}
-	
+
 	function process_request($request)
 	{
 		if (qa_get_logged_in_level() < QA_USER_LEVEL_ADMIN){
@@ -33,21 +33,21 @@ class useo_options {
 		$qa_content['title']="Ultimate SEO";
 		$qa_content['error']="";
 		$qa_content['suggest_next']="";
-		
+
 		$qa_content['script_rel'][]= $qa_modules['page']['Ultimate SEO Options']['urltoroot'] . 'include/easyResponsiveTabs.js';
 		$qa_content['script_rel'][]= $qa_modules['page']['Ultimate SEO Options']['urltoroot'] . 'include/main.js';
 		$qa_content['css_src'][]= $this->urltoroot . 'include/style.css';
-		
+
 		$qa_content['custom'] = $this->page_form();
 		//empty sidebar's content
 		$qa_content['sidepanel'] = '';
 		$qa_content['sidebar'] = '';
 		unset($qa_content['widgets']);
 		$qa_content['widgets']= array();
-		
-		return $qa_content;	
+
+		return $qa_content;
 	}
-	
+
 	function page_form(){
 		$output = '';
 		if ( (qa_clicked('useo_save')) && ($this->saved==false) ){
@@ -74,7 +74,7 @@ class useo_options {
 				qa_opt('useo_title_search', qa_post_text('useo_title_search'));
 				qa_opt('useo_title_users', qa_post_text('useo_title_users'));
 				qa_opt('useo_title_user', qa_post_text('useo_title_user'));
-				// URLs section 
+				// URLs section
 				qa_opt('useo_url_cleanup', (int)qa_post_text('useo_url_cleanup'));
 				qa_opt('useo_url_dont_make_empty', (int)qa_post_text('useo_url_dont_make_empty'));
 				qa_opt('useo_url_q_uppercase', (int)qa_post_text('useo_url_q_uppercase'));
@@ -120,7 +120,11 @@ class useo_options {
 				qa_opt('useo_meta_desc_sel_ans_enable', (int)qa_post_text('useo_meta_desc_sel_ans_enable'));
 				qa_opt('useo_meta_desc_length', (int)qa_post_text('useo_meta_desc_length'));
 				qa_opt('useo_meta_editor_enable', (int)qa_post_text('useo_meta_editor_enable'));
-				// Social Tags
+				qa_opt('useo_meta_home_title', qa_post_text('useo_meta_home_title'));
+				qa_opt('home_description', qa_post_text('home_description')); // native option
+				qa_opt('useo_meta_home_keywords', qa_post_text('useo_meta_home_keywords'));
+
+			// Social Tags
 				qa_opt('useo_social_og_enable_auto', (int)qa_post_text('useo_social_og_enable_auto'));
 				qa_opt('useo_social_og_desc_length', qa_post_text('useo_social_og_desc_length'));
 				qa_opt('useo_social_og_image', qa_post_text('useo_social_og_image'));
@@ -172,34 +176,34 @@ class useo_options {
 						<li>About<span>Ultimate SEO Plugin & Developer</span></li>
 					</ul>
 					<div class="resp-tabs-container">
-						<div>                   
+						<div>
 							' . $this->get_page_contents('title.php') . '
-						</div>                  
-						<div>                   
+						</div>  
+						<div>
 							' . $this->get_page_contents('urls.php') . '
 						</div>
 						<div>
 							' . ( (isset($qa_modules['module']['link optimizer Admin'])) ? 'You have installed <strong>"SEO Links"</strong> plugin which is outdated and replaced by this plugin. please remove it to enable SEO features in this section.' :$this->get_page_contents('links.php')  ) . '
-						</div>                  
-						<div>                   
+						</div>  
+						<div>   
 							' . ( (isset($qa_modules['module']['Scalable XML Sitemap']) || (isset($qa_modules['module']['XML Sitemap']))) ? 'You have installed a Sitemap plugin which can be replaced by "Ultimate SEO plugin". if you wish to use this plugin\'s sitemap features please remove it.' :$this->get_page_contents('sitemap.php')  ) . '
-						</div>                  
-						<div>                   
+						</div>  
+						<div>   
 							' . $this->get_page_contents('accessibility.php') . '
-						</div>                  
-						<div>                   
+						</div>  
+						<div>   
 							' . $this->get_page_contents('meta-tags.php') . '
 						</div>
 						<div>
 							' . $this->get_page_contents('social-sharing.php') . '
-						</div>                  
-						<div>                   
+						</div>  
+						<div>   
 							' . $this->get_page_contents('tags.php') . '
-						</div>                  
-						<div>                   
+						</div>  
+						<div>   
 							' . $this->get_page_contents('categories.php') . '
-						</div>                  
-						<div>                   
+						</div>  
+						<div>   
 							' . $this->get_page_contents('about.php') . '
 						</div>
 					</div>

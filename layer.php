@@ -13,28 +13,35 @@ class qa_html_theme_layer extends qa_html_theme_base {
 		if( ($this->template=='question') and (qa_opt('useo_meta_editor_enable')) ){
 			$metas = json_decode(qa_db_postmeta_get($this->content['q_view']['raw']['postid'], 'useo-meta-info'),true);
 			if (is_array($metas)) {
-				$this->meta_title = @$metas['title'];
-				$this->meta_description = @$metas['description'];
-				$this->meta_keywords = @$metas['keywords'];
+				$this->meta_title = qa_html(@$metas['title']);
+				$this->meta_description = qa_html(@$metas['description']);
+				$this->meta_keywords = qa_html(@$metas['keywords']);
 			}
+		} elseif ($this->template == 'qa') {
+			$this->meta_title = qa_opt('useo_meta_home_title');
+			$this->meta_description = qa_opt('home_description'); // native option
+			$this->meta_keywords = qa_opt('useo_meta_home_keywords');
+			$this->content['meta_title'] = $this->meta_title;
+			$this->content['description'] = $this->meta_description;
+			$this->content['keywords'] = $this->meta_keywords;
 		}
 		// Generate Social Meta Tags
 		$page_url = @$this->content['canonical'];
 		if(! empty($this->meta_description))
-			$description = $this->meta_description;
+			$description = qa_html($this->meta_description);
 		else
-			$description = @$this->content['description'];
+			$description = qa_html(@$this->content['description']);
 		if(! empty($this->meta_title))
 			$title = $this->meta_title;
 		else
-			$title = @$this->content['q_view']['raw']['title'];
+			$title = qa_html(@$this->content['q_view']['raw']['title']);
 
-		if($this->template=='question'){
+		if ($this->template === 'question' || $this->template === 'qa') {
 			if(qa_opt('useo_social_enable_editor')){
 				$this->social_metas = json_decode(qa_db_postmeta_get($this->content['q_view']['raw']['postid'], 'useo-social-info'),true);
 				if(is_array($this->social_metas))
 					foreach ($this->social_metas as $index => $variable){
-						$this->metas[$index]['content'] = $variable;
+						$this->metas[$index]['content'] = qa_html($variable);
 						$this->metas[$index]['type'] = '';
 					}
 			}
@@ -47,8 +54,9 @@ class qa_html_theme_layer extends qa_html_theme_base {
 				$this->metas['og-title']['type'] = 'property="og:title"';
 				// description
 				$gl_length = qa_opt('useo_social_og_desc_length');
-				if($gl_length<=0)
-						$gl_length = 140;
+				if ($gl_length <= 0) {
+					$gl_length = 140;
+				}
 				$this->metas['og-description']['content'] = useo_get_excerpt($description, 0, $gl_length);
 				$this->metas['og-description']['type'] = 'property="og:description"';
 				// Type
@@ -93,22 +101,22 @@ class qa_html_theme_layer extends qa_html_theme_base {
 					$this->metas['tc-handler']['type'] = 'property="twitter:site"';
 				}
 			}
-			if(qa_opt('useo_social_schema_enable')){ // Twitter Cards
+			if(qa_opt('useo_social_schema_enable')){ // Google+ schema
 				// title
 				$this->metas['gp-title']['content'] = $title;
 				$this->metas['gp-title']['type'] = 'itemprop="name"';
 				// description
-				$this->metas['gp-title']['content'] = $description;
-				$this->metas['gp-title']['type'] = 'itemprop="description"';
+				$this->metas['gp-description']['content'] = $description;
+				$this->metas['gp-description']['type'] = 'itemprop="description"';
 				// type
 				$gp_type = qa_opt('useo_social_schema_page_type');
 				if($gp_type==2)
 					$gp_page_type = 'Question';
 				elseif($gp_type==3)
 					$gp_page_type = 'Article';
-				if( isset($gp_page_type) ){
-					$this->metas['gp-title']['content'] = '';
-					$this->metas['gp-title']['type'] = 'itemscope itemtype="http://schema.org/' . $gp_page_type . '"';
+				if ($this->template == 'question' && isset($gp_page_type)) {
+					$this->metas['gp-type']['content'] = '';
+					$this->metas['gp-type']['type'] = 'itemscope itemtype="http://schema.org/' . $gp_page_type . '"';
 				}
 				// description
 				$gp_image = qa_opt('useo_social_gp_thumbnail');
@@ -180,6 +188,9 @@ class qa_html_theme_layer extends qa_html_theme_base {
 	// add canonical links to category pages
 	function head_metas()
 	{
+		// Q2A Generates meta description and keywords, just adding title here
+		if (strlen(@$this->content['meta_title']))
+			$this->output('<meta name="title" content="' . $this->content['meta_title'] . '"/>');
 		qa_html_theme_base::head_metas();
 		if(qa_opt('useo_cat_canonical_enable')){
 			$cat_slugs = useo_get_current_category_slug();
@@ -192,7 +203,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 	function head_script()
 	{
 		qa_html_theme_base::head_script();
-		if ( ($this->template=='question') and (qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN) ){
+		if ( $this->template=='question' && (qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN) ){
 			$variables = '';
 			$variables .= 'useo_ajax_url = "' . QA_HTML_THEME_LAYER_URLTOROOT . 'ajax.php";';
 			$variables .= 'useo_postid = ' . $this->content['q_view']['raw']['postid'] .';';
@@ -211,7 +222,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 				$title_template = qa_opt('useo_title_qa');
 				if(! empty($title_template) ){
 					$search = array( '%site-title%');
-					$replace   = array(qa_opt('site_title'));
+					$replace = array(qa_opt('site_title'));
 					$title = str_replace($search, $replace, $title_template);
 				}
 				break;
@@ -224,8 +235,8 @@ class qa_html_theme_layer extends qa_html_theme_base {
 					// title customization
 					$title_template = qa_opt('useo_title_qa_item');
 					if(! empty($title_template) ){
-						$search = array( '%site-title%', '%question-title%', '%category-name%');
-						$replace   = array(qa_opt('site_title'), @$this->content['q_view']['raw']['title'], $category_name);
+						$search = array('%site-title%', '%question-title%', '%category-name%');
+						$replace = array(qa_opt('site_title'), qa_html(@$this->content['q_view']['raw']['title']), $category_name);
 						$title = str_replace($search, $replace, $title_template);
 					}
 				}else{
@@ -388,14 +399,14 @@ class qa_html_theme_layer extends qa_html_theme_base {
 	// Page Meta Tags
 		$noindex = qa_opt('useo_access_noindex');
 		$nofollow = qa_opt('useo_access_nofollow');
-		if($noindex and $nofollow)
+		if($noindex && $nofollow)
 			$this->output('<meta name="robots" content="noindex, nofollow" />');
 		elseif($noindex)
 			$this->output('<meta name="robots" content="noindex" />');
 		else{
 			// if page is not already noindex, check if it needs to be noindex. also add nofollow if necessary
 			$status = 1; // content is long enough
-			if( ($this->template=='question') and (qa_opt('useo_access_length_enable')) and ( (int)qa_opt('useo_access_length')>0 ) ){
+			if( ($this->template=='question') && (qa_opt('useo_access_length_enable')) && ( (int)qa_opt('useo_access_length')>0 ) ){
 				$status = 0;
 				$minimum_words = (int)qa_opt('useo_access_length');
 				$word_count = str_word_count($this->content['q_view']['raw']['title']) + str_word_count($this->content['q_view']['raw']['content']);
@@ -432,19 +443,19 @@ class qa_html_theme_layer extends qa_html_theme_base {
 		if($this->template=='question'){
 			// setup custom meta keyword
 			if (! empty($this->meta_keywords))
-				$this->content['keywords'] = $this->meta_keywords;
+				$this->content['keywords'] = qa_html($this->meta_keywords);
 			// setup custom meta description
 			if (! empty($this->meta_description))
-				$this->content['description'] = $this->meta_description;
+				$this->content['description'] = qa_html($this->meta_description);
 			// if there was no custom meta description and it's supposed to read it from answers do it, otherwise don't change it
 			elseif(qa_opt('useo_meta_desc_ans_enable')){
 				$lenght = (int)qa_opt('useo_meta_desc_length');
 				if($lenght<=0)
 					$lenght = 160;
 				$text = '';
-				if( ($this->content['q_view']['raw']['acount'] > 0) and (qa_opt('useo_meta_desc_ans_enable')) ){
+				if( ($this->content['q_view']['raw']['acount'] > 0) && (qa_opt('useo_meta_desc_ans_enable')) ){
 					// get Selected Answer's content
-					if( (isset($this->content["q_view"]["raw"]["selchildid"])) and (qa_opt('useo_meta_desc_sel_ans_enable')) ){
+					if( (isset($this->content["q_view"]["raw"]["selchildid"])) && (qa_opt('useo_meta_desc_sel_ans_enable')) ){
 						foreach($this->content['a_list']['as'] as $answer)
 							if($answer['raw']['isselected'])
 								$text = $answer['raw']['content'];
@@ -460,12 +471,13 @@ class qa_html_theme_layer extends qa_html_theme_base {
 					}
 				}
 				if(!(empty($text))){
-					$excerpt = useo_get_excerpt($text, 0, $lenght);
+					global $qa_sanitize_html_newwindow;
+					$excerpt = useo_get_excerpt(qa_sanitize_html($text, $qa_sanitize_html_newwindow), 0, $lenght);
 					$this->content['description'] = $excerpt;
 				}
 			}
 			// Meta Tags and social meta tags
-			if($this->template=='question'){
+			if ($this->template == 'question' || $this->template == 'qa') {
 				if(qa_opt('useo_social_enable_editor')){
 					foreach($this->metas as $key => $value)
 						if( isset($this->social_metas[$key]) )
@@ -484,7 +496,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 	{
 		qa_html_theme_base::main_parts($content);
 
-		if( (qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN) and ($this->template=='question') and (qa_opt('useo_meta_editor_enable')) ){
+		if( (qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN) && ($this->template=='question') && (qa_opt('useo_meta_editor_enable')) ){
 
 			$this->output('<div class="qa-widgets-main qa-widgets-main-low">');
 			$this->output('<form name="useo-meta-editor" action="'.qa_self_html().'" method="post">');
@@ -500,7 +512,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 					</tr>
 					<tr>
 						<td class="qa-form-tall-data">
-							<input placeholder="' . $this->content['q_view']['raw']['title'] . '" id="useo-meta-editor-title" class="qa-form-tall-text" type="text" value="'. $this->meta_title .'" name="useo-meta-editor-title">
+							<input placeholder="' . qa_html($this->content['q_view']['raw']['title']) . '" id="useo-meta-editor-title" class="qa-form-tall-text" type="text" value="'. $this->meta_title .'" name="useo-meta-editor-title">
 						</td>
 					</tr>
 				</tbody>
@@ -513,7 +525,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 					</tr>
 					<tr>
 						<td class="qa-form-tall-data">
-							<textarea placeholder="' . $this->content['description'] . '" id="useo-meta-editor-description" class="qa-form-tall-text" cols="40" rows="3" name="useo-meta-editor-description">'. $this->meta_description .'</textarea>
+							<textarea placeholder="' . qa_html($this->content['description']) . '" id="useo-meta-editor-description" class="qa-form-tall-text" cols="40" rows="3" name="useo-meta-editor-description">'. $this->meta_description .'</textarea>
 						</td>
 					</tr>
 				</tbody>
@@ -542,7 +554,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 			$this->output('</form>');
 			$this->output('<hr /></div>');
 		}
-		if( (qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN) and ($this->template=='question') and (qa_opt('useo_social_enable_editor')) ){
+		if( (qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN) && ($this->template=='question') && (qa_opt('useo_social_enable_editor')) ){
 
 			$this->output('<div class="qa-widgets-main qa-widgets-main-low">');
 			$this->output('<form name="useo-meta-editor" action="'.qa_self_html().'" method="post">');
@@ -697,7 +709,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 		require_once QA_INCLUDE_DIR.'qa-util-string.php';
 		global
 			$useo_tag_desc_list, // Already filled in qa-tag-desc-overrides.php  -  All tags used in this page are listed in this array
-			$plugin_tag_map;       // here it will be filled with tag's meta descriptions
+			$plugin_tag_map;	   // here it will be filled with tag's meta descriptions
 		if (count(@$useo_tag_desc_list)) {
 			$result=qa_db_query_sub(
 				'SELECT tag, title, content FROM ^tagmetas WHERE tag IN ($)',
@@ -719,8 +731,9 @@ class qa_html_theme_layer extends qa_html_theme_base {
 		$html = new DOMDocument();
 		$html->loadHTML(mb_convert_encoding($taghtml, 'HTML-ENTITIES', 'UTF-8'));
 
-		foreach($html->getElementsByTagName('a') as $a)
-        {
+		$nodeList = $html->getElementsByTagName('a');
+		if ($nodeList->length > 0) {
+			$a = $nodeList->item(0);
 			if (!empty($plugin_tag_map[$a->nodeValue]['title']))
 				$a->setAttribute('title', $plugin_tag_map[$a->nodeValue]['title']);
 			if (!empty($plugin_tag_map[$a->nodeValue]['icon'])){
@@ -729,11 +742,10 @@ class qa_html_theme_layer extends qa_html_theme_base {
 				$element->setAttribute('class','qa-tag-img');
 				$element->setAttribute('width',qa_opt('useo_tag_desc_icon_width'));
 				$element->setAttribute('height',qa_opt('useo_tag_desc_icon_height'));
-				 $a->insertBefore($element, $a->firstChild);
+				$a->insertBefore($element, $a->firstChild);
 			}
+			$taghtml = $html->saveHTML($a);
 		}
-
-		$taghtml= $html->saveHTML();
 		qa_html_theme_base::post_tag_item($taghtml, $class);
 	}
 	// category link titles

@@ -38,7 +38,7 @@ function qa_q_request($questionid, $title)
 			$url = strtoupper($url);
 	}
 
-    return $url;
+	return $url;
 }
 
 function qa_tag_html($tag, $microformats=false, $favorited=false)
@@ -105,7 +105,7 @@ function qa_sanitize_html($html, $linksnewwindow=false, $storage=false)
 function qa_html_convert_urls($html, $newwindow=false)
 {
 	$host=useo_get_host($html);
-    $rel_types = array(1 => 'Nofollow', 2 => 'External', 3 => 'Nofollow External', 4 => '');
+	$rel_types = array(1 => 'Nofollow', 2 => 'External', 3 => 'Nofollow External', 4 => '');
 	$links_list=json_decode(qa_opt('useo_link_relations'));
 	$rel='nofollow';
 	if(is_array($links_list))

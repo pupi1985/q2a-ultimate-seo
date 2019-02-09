@@ -1,9 +1,9 @@
 <?php
 	class useo_scalable_xml_sitemaps {
-		
+
 		var $directory;
 		var $urltoroot;
-		
+
 		function load_module($directory, $urltoroot)
 		{
 			$this->directory=$directory;
@@ -30,7 +30,7 @@
 			);
 		}
 
-		
+
 		function match_request($request)
 		{
 		//var_dump(substr($request, 8,strlen($request)-12) );
@@ -38,11 +38,11 @@
 				return true;
 		}
 
-		
+
 		function process_request($request)
 		{
 			//@ini_set('display_errors', 0); // we don't want to show PHP errors inside XML
-			
+
 			if($request == 'sitemap.xml'){
 				$req = '';
 			}else{
@@ -52,7 +52,7 @@
 
 			$siteurl=qa_opt('site_url');
 			header('Content-type: text/xml; charset=utf-8');
-		// Index Pages	
+		// Index Pages
 			// Indexed all XML sitemaps for question's lists
 			// example: sitemap.xml
 			if ( $req=='' ) {
@@ -60,8 +60,8 @@
 				$q_sitemaps=qa_db_read_one_assoc(qa_db_query_sub(
 					"SELECT count(*) as total from ^posts WHERE type='Q'"
 				));
-				$count=qa_opt('useo_sitemap_question_count');
-				$q_sitemap_count = ceil($q_sitemaps['total'] / $count);
+				$count = (int)qa_opt('useo_sitemap_question_count');
+				$q_sitemap_count = $count > 0 ? ceil($q_sitemaps['total'] / $count) : 0;
 				for ($i = 0; $i < $q_sitemap_count; $i++){
 					$this->sitemap_index_output('sitemap-'. $i . '.xml');
 				}
@@ -81,7 +81,7 @@
 				$this->sitemap_all();
 				$this->sitemap_index_footer();
 			}
-			
+
 			//	Question pages
 			// numbered question sitenaps
 			// example: sitemap-1.xml, sitemap-12.xml
@@ -89,15 +89,15 @@
 				$hotstats=qa_db_read_one_assoc(qa_db_query_sub(
 					"SELECT MIN(hotness) AS base, MAX(hotness)-MIN(hotness) AS spread FROM ^posts WHERE type='Q'"
 				));
-				
-				$count=qa_opt('useo_sitemap_question_count');
+
+				$count=(int)qa_opt('useo_sitemap_question_count');
 				$start=(int)$req[0]*$count;
 
 				$questions=qa_db_read_all_assoc(qa_db_query_sub(
 					"SELECT postid, title, hotness FROM ^posts WHERE type='Q' ORDER BY postid LIMIT #,#",
 					$start,$count
 				));
-				
+
 				if (count($questions)){
 					$this->sitemap_header();
 					foreach ($questions as $question) {
@@ -107,15 +107,15 @@
 					$this->sitemap_footer();
 				}
 			}
-		
+
 
 		//User pages
 			if ( ($req[0]=='users') && (!QA_FINAL_EXTERNAL_USERS) && qa_opt('useo_sitemap_users_enable')) {
 			// user's numbered sitemaps
-			// example: sitemap-users-1.xml, sitemap-users-12.xml		
+			// example: sitemap-users-1.xml, sitemap-users-12.xml
 				if(isset($req[1]) && ((strval((int)$req[1]))==$req[1]) && ((int)qa_opt('useo_sitemap_users_count')!=0) ){
 					$count=qa_opt('useo_sitemap_users_count');
-					$start=(int)$req[1]*$count;		
+					$start=(int)$req[1]*$count;
 					$users=qa_db_read_all_assoc(qa_db_query_sub(
 						"SELECT userid, handle FROM ^users ORDER BY userid LIMIT #,#",
 						$start,$count
@@ -144,15 +144,15 @@
 					}
 				}
 			}
-			
+
 
 		//	Tag pages
 			if (($req[0]=='tags') && qa_using_tags() && qa_opt('useo_sitemap_tags_enable')) {
 			// link to each tag's page sitemaps
-			// example: sitemap-tags-1.xml, sitemap-tags-12.xml				
+			// example: sitemap-tags-1.xml, sitemap-tags-12.xml
 				if(isset($req[1]) && ((strval((int)$req[1]))==$req[1]) && ((int)qa_opt('useo_sitemap_tags_count')!=0) ){
 					$count=qa_opt('useo_sitemap_tags_count');
-					$start=(int)$req[1]*$count;		
+					$start=(int)$req[1]*$count;
 					$tagwords=qa_db_read_all_assoc(qa_db_query_sub(
 						"SELECT wordid, word, tagcount FROM ^words WHERE tagcount>0 ORDER BY wordid LIMIT #,#",
 						$start,$count
@@ -180,7 +180,7 @@
 					}
 				}
 			}
-			
+
 		//	link to all category pages
 			if (($req[0]=='category')  && (!(isset($req[1]))) && qa_using_categories() && qa_opt('useo_sitemap_categories_enable')) {
 					$categories=qa_db_read_all_assoc(qa_db_query_sub(
@@ -199,7 +199,7 @@
 				$hotstats=qa_db_read_one_assoc(qa_db_query_sub(
 					"SELECT MIN(hotness) AS base, MAX(hotness)-MIN(hotness) AS spread FROM ^posts WHERE type='Q'"
 				));
-				
+
 				if(count($req)>=3){ //because: "category-x-x-x-x-1" | 1 category + 1 sount + at least 1 category = 3
 			// link to questions in a category or sub category
 			// example: sitemap-category-RootCat-SubCat-2.xml
@@ -207,7 +207,7 @@
 					$slug_list = array_splice($req, 1, -1);
 					$slug = implode("/", array_reverse($slug_list));
 					$count=qa_opt('useo_sitemap_categoriy_q_count');
-					$start=(int)$req[count($req)-1]*$count;	
+					$start=(int)$req[count($req)-1]*$count;
 					$questions=qa_db_read_all_assoc(qa_db_query_sub(
 						'SELECT postid, title, hotness FROM ^posts WHERE ^posts.type=$
 						AND categoryid=(SELECT categoryid FROM ^categories WHERE ^categories.backpath=$ LIMIT 1) 
@@ -225,7 +225,7 @@
 						'Q', $slug
 					));
 				}
-				
+
 				if (count($questions))
 					$this->sitemap_header();
 					foreach ($questions as $question) {
@@ -234,13 +234,13 @@
 					}
 					$this->sitemap_footer();
 			}
-			
-		
+
+
 		//	Pages in category browser
-		
+
 			if (qa_using_categories() && qa_opt('useo_sitemap_categories_enable')) {
 				$this->sitemap_output('categories', 0.5);
-				
+
 				$nextcategoryid=0;
 				$this->sitemap_header();
 				while (1) { // only find categories with a child
@@ -258,13 +258,13 @@
 				}
 				$this->sitemap_footer();
 			}
-			
+
 
 		//	Finish up...
-			
+
 			return null;
 		}
-		
+
 
 		function sitemap_all(){
 			// all indexed sitemaps
@@ -275,14 +275,14 @@
 			));
 			foreach ($categories as $category){
 				$backpath = $category['backpath'];
-				
+
 				$count=qa_opt('useo_sitemap_categoriy_q_count');
 				$qcount=qa_db_read_one_assoc(qa_db_query_sub(
 					'SELECT count(*) as total FROM ^posts WHERE ^posts.type=$
 					AND categoryid=(SELECT categoryid FROM ^categories WHERE ^categories.backpath=$ LIMIT 1)',
 					'Q', $backpath
 				));
-				
+
 				$category_slug = implode('-', array_reverse(explode('/', $category['backpath'])));
 				$cat_count = ceil($qcount['total'] / $count);
 				for ($i = 0; $i < $cat_count; $i++){
@@ -295,11 +295,11 @@
 			$q_sitemaps=qa_db_read_one_assoc(qa_db_query_sub(
 				"SELECT count(*) as total from ^posts WHERE type='Q'"
 			));
-			$count=qa_opt('useo_sitemap_question_count');
-			$q_sitemap_count = ceil($q_sitemaps['total'] / $count);
+			$count = (int)qa_opt('useo_sitemap_question_count');
+			$q_sitemap_count = $count > 0 ? ceil($q_sitemaps['total'] / $count) : 0;
 			for ($i = 0; $i < $q_sitemap_count; $i++){
 				$this->sitemap_index_output('sitemap-'. $i . '.xml');
-			}				
+			}
 
 			// user's list sitemap
 			if( qa_opt('useo_sitemap_users_enable') )
@@ -311,7 +311,7 @@
 				$u_sitemap_count = ceil($u_sitemaps['total'] / $count);
 				for ($i = 0; $i < $u_sitemap_count; $i++){
 					$this->sitemap_index_output('sitemap-users-'. $i . '.xml');
-				}				
+				}
 			}
 			// tag's list sitemap
 			if( qa_opt('useo_sitemap_tags_enable') )
@@ -323,7 +323,7 @@
 				$t_sitemap_count = ceil($t_sitemaps['total'] / $count);
 				for ($i = 0; $i < $t_sitemap_count; $i++){
 					$this->sitemap_index_output('sitemap-tags-'. $i . '.xml');
-				}				
+				}
 			}
 			// categories's list sitemap
 			if( qa_opt('useo_sitemap_categories_enable') )
@@ -331,7 +331,7 @@
 				$this->sitemap_index_output('sitemap-category.xml');
 			}
 		}
-		
+
 		function sitemap_header(){
 			echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
 			echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
@@ -361,9 +361,9 @@
 				"\t\t<loc>".qa_xml(qa_path($request, null, qa_opt('site_url')))."</loc>\n".
 				"\t</sitemap>\n";
 		}
-	
+
 	}
-	
+
 
 /*
 	Omit PHP closing tag to help avoid accidental output
