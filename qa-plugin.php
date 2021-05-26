@@ -7,7 +7,7 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 define('USEO_DIR', dirname(__FILE__));
 define('USEO_VERSION', 1);
 
-require_once QA_INCLUDE_DIR . 'qa-util-string.php';
+require_once QA_INCLUDE_DIR . 'util/string.php';
 require_once USEO_DIR . '/library/functions.php';
 
 qa_register_plugin_module('page', 'options.php', 'useo_options', 'Ultimate SEO Options');
