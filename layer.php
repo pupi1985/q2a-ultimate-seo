@@ -145,7 +145,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 			}
 		}
 		// get all category titles
-		if(count($categoryid_list)){
+		if(!empty($categoryid_list)){
 			$result=qa_db_query_sub(
 				'SELECT categoryid, content FROM ^categorymetas WHERE categoryid IN ($) AND title=$',
 				$categoryid_list,'useo_cat_title'
@@ -158,7 +158,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 				}
 		}
 		// set category title for navigation
-		if(count(@$this->content['navigation']['cat']) && qa_opt('useo_cat_title_nav_enable')){
+		if(!empty($this->content['navigation']['cat']) && qa_opt('useo_cat_title_nav_enable')){
 			foreach ($this->content['navigation']['cat'] as $index => $item){
 				if(isset($item['categoryid']) && isset($useo_cat_desc_map[$item['categoryid']]))
 					$this->content['navigation']['cat'][$index]["popup"] = $useo_cat_desc_map[$item['categoryid']]['content'];
@@ -217,6 +217,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 
 	// Title Customization Options
 		$title = '';
+		$requestParts = explode('/', $this->request);
 		switch ($this->template) {
 			case 'qa':
 				$title_template = qa_opt('useo_title_qa');
@@ -246,7 +247,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 				break;
 			case 'questions':
 				$category_name = '';
-				if( count(explode('/',$this->request)) > 1 && !empty($this->content["q_list"]["qs"]))
+				if(is_array($requestParts) && count($requestParts) > 1 && !empty($this->content["q_list"]["qs"]))
 					$category_name = $this->content["q_list"]["qs"][0]["raw"]["categoryname"];
 				$sort = qa_get('sort');
 				if(empty($sort)){
@@ -288,7 +289,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 			case 'unanswered':
 				$sort = qa_get('by');
 				$category_name = '';
-				if( count(explode('/',$this->request)) > 1 && !empty($this->content["q_list"]["qs"]))
+				if(is_array($requestParts) &&  count($requestParts) > 1 && !empty($this->content["q_list"]["qs"]))
 					$category_name = $this->content["q_list"]["qs"][0]["raw"]["categoryname"];
 
 				if(empty($sort)){
@@ -318,7 +319,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 				$title_template = qa_opt('useo_title_activity');
 				if(! empty($title_template) ){
 					$category_name = '';
-					if( count(explode('/',$this->request)) > 1 && !empty($this->content["q_list"]["qs"]))
+					if(is_array($requestParts) && count($requestParts) > 1 && !empty($this->content["q_list"]["qs"]))
 						$category_name = $this->content["q_list"]["qs"][0]["raw"]["categoryname"];
 
 					$search = array( '%site-title%', '%recent-activity-title%', '%category-name%');
@@ -353,7 +354,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 			case 'tag':
 				$title_template = qa_opt('useo_title_tag');
 				if(! empty($title_template) ){
-					$req = explode('/',$this->request);
+					$req = $requestParts;
 					$tag = $req[1];
 					$search = array( '%site-title%', '%questions-tagged-x%', '%current-tag%');
 					$replace   = array(qa_opt('site_title'), qa_lang_html_sub('main/questions_tagged_x', qa_html($tag)), $tag );
@@ -380,15 +381,13 @@ class qa_html_theme_layer extends qa_html_theme_base {
 			case 'user':
 				$title_template = qa_opt('useo_title_user');
 				if(! empty($title_template) ){
-					$req = explode('/',$this->request);
+					$req = $requestParts;
 					$user = $req[1];
 					$search = array( '%site-title%', '%user-x%', '%current-user%');
 					$replace   = array(qa_opt('site_title'), qa_lang_html_sub('main/results_for_x', qa_html($user)), $user );
 					$title = str_replace($search, $replace, $title_template);
 				}
 				break;
-
-
 		}
 
 		if(empty($title))
@@ -710,7 +709,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 		global
 			$useo_tag_desc_list, // Already filled in qa-tag-desc-overrides.php  -  All tags used in this page are listed in this array
 			$plugin_tag_map;	   // here it will be filled with tag's meta descriptions
-		if (count(@$useo_tag_desc_list)) {
+		if (!empty($useo_tag_desc_list)) {
 			$result=qa_db_query_sub(
 				'SELECT tag, title, content FROM ^tagmetas WHERE tag IN ($)',
 				array_keys($useo_tag_desc_list)
