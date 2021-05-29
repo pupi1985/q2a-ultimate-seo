@@ -75,7 +75,9 @@ function qa_sanitize_html($html, $linksnewwindow=false, $storage=false)
 	$links_list=json_decode(qa_opt('useo_link_relations'));
 	$dom = new DOMDocument;
 	$encod  = mb_detect_encoding($safe);
+	libxml_use_internal_errors(true);
 	$dom->loadHTML(mb_convert_encoding($safe, 'HTML-ENTITIES', $encod));
+	libxml_use_internal_errors(false);
 	$links = $dom->getElementsByTagName('a');
 	// apply rel change to list of links
 	if (is_array($links_list) && !empty($links_list)) {
