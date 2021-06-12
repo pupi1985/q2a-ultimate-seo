@@ -767,7 +767,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
 		{
 			global $useo_tag_desc_list; // Already filled in qa-tag-desc-overrides.php  -  All tags used in this page are listed in this array
 
-			if (count(@$useo_tag_desc_list)) {
+			if (!empty($useo_tag_desc_list)) {
 				// Get all tag meta in this query
 				$result=qa_db_query_sub(
 					'SELECT tag, title, content FROM ^tagmetas WHERE tag IN ($)',
