@@ -176,27 +176,8 @@ class qa_html_theme_layer extends qa_html_theme_base
                 }
             }
         }
-        // Administrator panel navigation item
-        if ($this->request == 'admin/ulitmate_seo') {
-            if (empty($this->content['navigation']['sub'])) {
-                $this->content['navigation']['sub'] = array();
-            }
-            require_once QA_INCLUDE_DIR . 'qa-app-admin.php';
-            $admin_nav = qa_admin_sub_navigation();
-            $this->content['navigation']['sub'] = array_merge(
-                $admin_nav,
-                $this->content['navigation']['sub']
-            );
-        }
-        if (($this->template == 'admin') or ($this->request == 'ulitmate_seo')) {
-            $this->content['navigation']['sub']['ulitmate_seo'] = array(
-                'label' => 'Ultimate SEO',
-                'url' => qa_path_html('admin/ulitmate_seo'),
-            );
-            if ($this->request == 'admin/ulitmate_seo') {
-                $this->content['navigation']['sub']['ulitmate_seo']['selected'] = true;
-            }
-        }
+
+        $this->adminMenuItem();
     }
 
     // add canonical links to category pages
@@ -856,5 +837,36 @@ class qa_html_theme_layer extends qa_html_theme_base
             }
         }
         qa_html_theme_base::ranking($ranking);
+    }
+
+    private function adminMenuItem()
+    {
+        if ($this->template !== 'admin') {
+            return;
+        }
+
+        if (!qa_admin_check_privileges($this->content)) {
+            return;
+        }
+
+        $this->content['navigation']['sub']['ulitmate_seo'] = array(
+            'label' => 'Ultimate SEO',
+            'url' => qa_path_html('admin/ulitmate_seo'),
+        );
+
+        if ($this->request == 'admin/ulitmate_seo') {
+            if (empty($this->content['navigation']['sub'])) {
+                $this->content['navigation']['sub'] = array();
+            }
+
+            // For qa_admin_sub_navigation()
+            require_once QA_INCLUDE_DIR . 'app/admin.php';
+
+            $this->content['navigation']['sub'] = array_merge(
+                qa_admin_sub_navigation(),
+                $this->content['navigation']['sub']
+            );
+            $this->content['navigation']['sub']['ulitmate_seo']['selected'] = true;
+        }
     }
 }
