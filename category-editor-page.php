@@ -6,7 +6,7 @@ class useo_category_editor_page
     {
         $parts = explode('/', $request);
 
-        return $parts[0] == 'category-edit';
+        return $parts[0] === 'category-edit';
     }
 
     function process_request($request)

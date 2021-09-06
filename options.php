@@ -7,9 +7,9 @@ if (!defined('QA_VERSION')) {
 
 class useo_options
 {
-    var $directory;
-    var $urltoroot;
-    var $saved;
+    private $directory;
+    private $urltoroot;
+    private $saved;
 
     function load_module($directory, $urltoroot)
     {
@@ -19,11 +19,7 @@ class useo_options
 
     function match_request($request)
     {
-        if ($request == 'admin/ulitmate_seo') {
-            return true;
-        }
-
-        return false;
+        return $request === 'admin/ultimate_seo';
     }
 
     function process_request($request)

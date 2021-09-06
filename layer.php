@@ -849,12 +849,12 @@ class qa_html_theme_layer extends qa_html_theme_base
             return;
         }
 
-        $this->content['navigation']['sub']['ulitmate_seo'] = array(
+        $this->content['navigation']['sub']['ultimate_seo'] = array(
             'label' => 'Ultimate SEO',
-            'url' => qa_path_html('admin/ulitmate_seo'),
+            'url' => qa_path_html('admin/ultimate_seo'),
         );
 
-        if ($this->request == 'admin/ulitmate_seo') {
+        if ($this->request == 'admin/ultimate_seo') {
             if (empty($this->content['navigation']['sub'])) {
                 $this->content['navigation']['sub'] = array();
             }
@@ -866,7 +866,7 @@ class qa_html_theme_layer extends qa_html_theme_base
                 qa_admin_sub_navigation(),
                 $this->content['navigation']['sub']
             );
-            $this->content['navigation']['sub']['ulitmate_seo']['selected'] = true;
+            $this->content['navigation']['sub']['ultimate_seo']['selected'] = true;
         }
     }
 }
