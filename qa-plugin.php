@@ -1,8 +1,8 @@
 <?php
 
 if (!defined('QA_VERSION')) { // don't allow this page to be requested directly from browser
-	header('Location: ../../');
-	exit;
+    header('Location: ../../');
+    exit;
 }
 define('USEO_DIR', dirname(__FILE__));
 define('USEO_VERSION', 1);
