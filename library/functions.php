@@ -67,6 +67,9 @@ function useo_reset_settings()
     qa_opt('useo_title_users', '');
     qa_opt('useo_title_user', '');
 
+    // Links section
+    qa_opt('useo_link_relations', '[]');
+
     // URLs section
     qa_opt('useo_url_cleanup', 1);
     qa_opt('useo_url_dont_make_empty', 1);

@@ -17,6 +17,16 @@ class useo_options
         $this->urltoroot = $urltoroot;
     }
 
+    public function option_default($option)
+    {
+        switch ($option) {
+            case 'useo_link_relations':
+                return '[]';
+        }
+
+        return null;
+    }
+
     function match_request($request)
     {
         return $request === 'admin/ultimate_seo';
@@ -101,8 +111,8 @@ class useo_options
             qa_opt('useo_url_words_list', $words_list);
 
             // SEO Links section
+            $rel_options = array();
             if (isset($_POST['useo_link_url'])) {
-                $rel_options = array();
                 $link = $_POST['useo_link_url'];
                 $rel = $_POST['useo_link_rel'];
                 $count = 0;
@@ -111,8 +121,9 @@ class useo_options
                     $rel_options[$count]['rel'] = $rel[$key];
                     $count++;
                 }
-                qa_opt('useo_link_relations', json_encode($rel_options));
             }
+            qa_opt('useo_link_relations', json_encode($rel_options));
+
             // XML sitemap section
             qa_opt('useo_sitemap_enable', (int)qa_post_text('useo_sitemap_enable'));
             qa_opt('useo_sitemap_question_count', (int)qa_post_text('useo_sitemap_question_count'));
