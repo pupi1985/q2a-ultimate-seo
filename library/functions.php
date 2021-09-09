@@ -9,34 +9,35 @@ function updateRelAttributeFromHtml($html)
 {
     $relTypes = array(1 => 'nofollow', 2 => 'external', 3 => 'nofollow external');
     $linksList = json_decode(qa_opt('useo_link_relations'), true);
+        if(!empty($linksList)){
+            $linkToRelMap = array_column($linksList, 'rel', 'url');
 
-    $linkToRelMap = array_column($linksList, 'rel', 'url');
+            $html = preg_replace_callback('/<a([^>]*?)\shref="([^"]*)"([^>]*)>/i', function ($matches) use ($relTypes, $linkToRelMap) {
+                $domain = parse_url($matches[2], PHP_URL_HOST);
 
-    $html = preg_replace_callback('/<a([^>]*?)\shref="([^"]*)"([^>]*)>/i', function ($matches) use ($relTypes, $linkToRelMap) {
-        $domain = parse_url($matches[2], PHP_URL_HOST);
+                if (!isset($linkToRelMap[$domain])) {
+                    return $matches[0];
+                }
 
-        if (!isset($linkToRelMap[$domain])) {
-            return $matches[0];
+                // If configuration is not dofollow
+                if (isset($relTypes[$linkToRelMap[$domain]])) {
+                    $rel = $relTypes[$linkToRelMap[$domain]];
+                    $rel = sprintf(' rel="%s"', $rel);
+                } else { // If configuration is dofollow
+                    $rel = '';
+                }
+
+                $newHtml = preg_replace('/<a([^>]*?)\srel="[^"]*?"([^>]*)>/i', sprintf('<a\1%s\2>', $rel), $matches[0]);
+                // If rel attribute has not been found in the original string
+                if ($newHtml === $matches[0] && $rel !== '') {
+                    $newHtml = preg_replace('/(.*)>$/i', sprintf('\1%s>', $rel), $matches[0]);
+                }
+
+                return $newHtml;
+            }, $html);
+
+            return $html;
         }
-
-        // If configuration is not dofollow
-        if (isset($relTypes[$linkToRelMap[$domain]])) {
-            $rel = $relTypes[$linkToRelMap[$domain]];
-            $rel = sprintf(' rel="%s"', $rel);
-        } else { // If configuration is dofollow
-            $rel = '';
-        }
-
-        $newHtml = preg_replace('/<a([^>]*?)\srel="[^"]*?"([^>]*)>/i', sprintf('<a\1%s\2>', $rel), $matches[0]);
-        // If rel attribute has not been found in the original string
-        if ($newHtml === $matches[0] && $rel !== '') {
-            $newHtml = preg_replace('/(.*)>$/i', sprintf('\1%s>', $rel), $matches[0]);
-        }
-
-        return $newHtml;
-    }, $html);
-
-    return $html;
 }
 
 function useo_reset_settings()
