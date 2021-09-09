@@ -186,7 +186,6 @@ class useo_options
 						<li class="tab_identifier_child">Social Sharing<span>Social Media Meta Tags</span></li>
 						<li class="tab_identifier_child">Tags<span>Optimizing Question Tags</span></li>
 						<li class="tab_identifier_child">Categories<span>Optimizing Categories</span></li>
-						<li class="tab_identifier_child">About<span>Ultimate SEO Plugin & Developer</span></li>
 					</ul>
 					<div class="resp-tabs-container tab_identifier_child">
 						<div class="tab_identifier_child">
@@ -216,9 +215,6 @@ class useo_options
 						<div class="tab_identifier_child">
 							' . $this->get_page_contents('categories.php') . '
 						</div>  
-						<div class="tab_identifier_child">
-							' . $this->get_page_contents('about.php') . '
-						</div>
 					</div>
 				</div>
 				<section class="qseo-buttons-container">
