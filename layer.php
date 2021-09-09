@@ -2,11 +2,11 @@
 
 class qa_html_theme_layer extends qa_html_theme_base
 {
-    var $meta_title;
-    var $meta_description;
-    var $meta_keywords;
-    var $metas = array();
-    var $social_metas = array();
+    private $meta_title;
+    private $meta_description;
+    private $meta_keywords;
+    private $metas = array();
+    private $social_metas = array();
 
     function doctype()
     {

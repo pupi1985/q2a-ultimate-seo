@@ -37,8 +37,18 @@ class useo_options
         $qa_content['error'] = "";
         $qa_content['suggest_next'] = "";
 
-        $qa_content['script_rel'][] = $qa_modules['page']['Ultimate SEO Options']['urltoroot'] . 'include/easyResponsiveTabs.js';
-        $qa_content['script_rel'][] = $qa_modules['page']['Ultimate SEO Options']['urltoroot'] . 'include/main.js';
+        if (!isset($qa_content['body_footer'])) {
+            $qa_content['body_footer'] = '';
+        }
+
+        $qa_content['body_footer'] .= sprintf('<script src="%s"></script>', $this->urltoroot . 'include/easy-responsive-tabs/js/easyResponsiveTabs.js');
+        $qa_content['body_footer'] .= sprintf('<script src="%s"></script>', $this->urltoroot . 'include/main.js');
+
+        if (!isset($qa_content['css_src'])) {
+            $qa_content['css_src'] = array();
+        }
+
+        $qa_content['css_src'][] = $this->urltoroot . 'include/easy-responsive-tabs/css/easy-responsive-tabs.min.css';
         $qa_content['css_src'][] = $this->urltoroot . 'include/style.css';
 
         $qa_content['custom'] = $this->page_form();
@@ -166,55 +176,55 @@ class useo_options
         $output .= '
 			<form name="useo" action="' . qa_self_html() . '" method="post">
 				<div id="verticalTab">
-					<ul class="resp-tabs-list">
-						<li>Title<span>Page Title Customizations</span></li>
-						<li>URLs<span>URL Customizations</span></li>
-						<li>Links<span>Link Optimizations</span></li>
-						<li>Sitemap<span>Scalable XML Sitemap</span></li>
-						<li>Accessibility<span>Accessibility for Search engines</span></li>
-						<li>Meta Tags<span>Meta Tag Options</span></li>
-						<li>Social Sharing<span>Social Media Meta Tags</span></li>
-						<li>Tags<span>Optimizing Question Tags</span></li>
-						<li>Categories<span>Optimizing Categories</span></li>
-						<li>About<span>Ultimate SEO Plugin & Developer</span></li>
+					<ul class="resp-tabs-list tab_identifier_child">
+						<li class="tab_identifier_child">Title<span>Page Title Customizations</span></li>
+						<li class="tab_identifier_child">URLs<span>URL Customizations</span></li>
+						<li class="tab_identifier_child">Links<span>Link Optimizations</span></li>
+						<li class="tab_identifier_child">Sitemap<span>Scalable XML Sitemap</span></li>
+						<li class="tab_identifier_child">Accessibility<span>Accessibility for Search engines</span></li>
+						<li class="tab_identifier_child">Meta Tags<span>Meta Tag Options</span></li>
+						<li class="tab_identifier_child">Social Sharing<span>Social Media Meta Tags</span></li>
+						<li class="tab_identifier_child">Tags<span>Optimizing Question Tags</span></li>
+						<li class="tab_identifier_child">Categories<span>Optimizing Categories</span></li>
+						<li class="tab_identifier_child">About<span>Ultimate SEO Plugin & Developer</span></li>
 					</ul>
-					<div class="resp-tabs-container">
-						<div>
+					<div class="resp-tabs-container tab_identifier_child">
+						<div class="tab_identifier_child">
 							' . $this->get_page_contents('title.php') . '
 						</div>  
-						<div>
+						<div class="tab_identifier_child">
 							' . $this->get_page_contents('urls.php') . '
 						</div>
-						<div>
+						<div class="tab_identifier_child">
 							' . ((isset($qa_modules['module']['link optimizer Admin'])) ? 'You have installed <strong>"SEO Links"</strong> plugin which is outdated and replaced by this plugin. please remove it to enable SEO features in this section.' : $this->get_page_contents('links.php')) . '
 						</div>  
-						<div>   
+						<div class="tab_identifier_child">
 							' . ((isset($qa_modules['module']['Scalable XML Sitemap']) || (isset($qa_modules['module']['XML Sitemap']))) ? 'You have installed a Sitemap plugin which can be replaced by "Ultimate SEO plugin". if you wish to use this plugin\'s sitemap features please remove it.' : $this->get_page_contents('sitemap.php')) . '
 						</div>  
-						<div>   
+						<div class="tab_identifier_child">
 							' . $this->get_page_contents('accessibility.php') . '
 						</div>  
-						<div>   
+						<div class="tab_identifier_child">
 							' . $this->get_page_contents('meta-tags.php') . '
 						</div>
-						<div>
+						<div class="tab_identifier_child">
 							' . $this->get_page_contents('social-sharing.php') . '
 						</div>  
-						<div>   
+						<div class="tab_identifier_child">
 							' . $this->get_page_contents('tags.php') . '
 						</div>  
-						<div>   
+						<div class="tab_identifier_child">
 							' . $this->get_page_contents('categories.php') . '
 						</div>  
-						<div>   
+						<div class="tab_identifier_child">
 							' . $this->get_page_contents('about.php') . '
 						</div>
 					</div>
-					<section class="qseo-buttons-container">
-						<input class="qa-form-tall-button qa-form-tall-button-save useo-right" type="submit" title="" value="Save Changes" name="useo_save">
-						<input class="qa-form-tall-button " type="submit" title="" value="Reset Settings" name="useo_reset">
-					</section>
 				</div>
+				<section class="qseo-buttons-container">
+					<input class="qa-form-tall-button qa-form-tall-button-save useo-right" type="submit" title="" value="Save Changes" name="useo_save">
+					<input class="qa-form-tall-button" type="submit" title="" value="Reset Settings" name="useo_reset">
+				</section>
 			</form>
 		';
 
