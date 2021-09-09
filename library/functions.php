@@ -149,36 +149,42 @@ function useo_get_excerpt($str, $startPos = 0, $maxLength = 160)
     return $excerpt;
 }
 
-// return category slug if current page is a category, return false if it's not
+/**
+ * Return category slug if current page is a category, return false if it's not.
+ *
+ * @return array|false
+ */
 function useo_get_current_category_slug()
 {
     global $useo_category_slug;
+
     if (isset($useo_category_slug)) {
         return $useo_category_slug;
-    } else { // check if it's a category or not
-        $requestparts = qa_request_parts();
-        $requestlower = strtolower(qa_request());
-        $firstlower = strtolower($requestparts[0]);
-        $routing = qa_page_routing();
-        // unanswered & questions pages may contain categories.
-        unset($routing['activity/']);
-        unset($routing['unanswered/']);
-        unset($routing['questions/']);
-        if ((isset($routing[$requestlower])) or (isset($routing[$firstlower . '/'])) or (is_numeric($requestparts[0]))) {
-            $useo_category_slug = false;
-
-            return false;
-        }
-        $explicitqa = (strtolower($requestparts[0]) == 'qa' or strtolower($requestparts[0]) == 'unanswered' or strtolower($requestparts[0]) == 'questions' or strtolower($requestparts[0]) == 'activity');
-
-        if ($explicitqa) {
-            $useo_category_slug = array_slice($requestparts, 1);
-        } else if (strlen($requestparts[0])) {
-            $useo_category_slug = $requestparts;
-        } else {
-            $useo_category_slug = false;
-        }
-
-        return $useo_category_slug;
     }
+
+    $requestparts = qa_request_parts();
+    $requestlower = strtolower(qa_request());
+    $firstlower = strtolower($requestparts[0]);
+    $routing = qa_page_routing();
+    // unanswered & questions pages may contain categories.
+    unset($routing['activity/']);
+    unset($routing['unanswered/']);
+    unset($routing['questions/']);
+    if (isset($routing[$requestlower]) || isset($routing[$firstlower . '/']) || is_numeric($requestparts[0])) {
+        $useo_category_slug = false;
+
+        return false;
+    }
+
+    $explicitqa = in_array(strtolower($requestparts[0]), array('qa', 'unanswered', 'questions', 'activity'));
+
+    if ($explicitqa) {
+        $useo_category_slug = array_slice($requestparts, 1);
+    } else if (strlen($requestparts[0]) > 0) {
+        $useo_category_slug = $requestparts;
+    } else {
+        $useo_category_slug = false;
+    }
+
+    return $useo_category_slug;
 }
