@@ -91,7 +91,6 @@ class useo_options
             qa_opt('useo_url_words_list', $words_list);
 
             // SEO Links section
-            qa_opt('useo_links_internal_dofollow', (int)qa_post_text('useo_links_internal_dofollow'));
             if (isset($_POST['useo_link_url'])) {
                 $rel_options = array();
                 $link = $_POST['useo_link_url'];

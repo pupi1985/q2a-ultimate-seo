@@ -1,18 +1,42 @@
 <?php
-// just dump content for debuging
-if (!(function_exists('v'))) {
-    function v($c)
-    {
-        echo '<pre style="text-align: left;">';
-        var_dump($c);
-        echo '</pre>';
-    }
-}
-function useo_get_host($Address)
-{
-    $parseUrl = parse_url(trim($Address));
 
-    return @trim($parseUrl[host] ? $parseUrl[host] : array_shift(explode('/', $parseUrl[path], 2)));
+/**
+ * @param string $html
+ *
+ * @return array|string|string[]|null
+ */
+function updateRelAttributeFromHtml($html)
+{
+    $relTypes = array(1 => 'nofollow', 2 => 'external', 3 => 'nofollow external');
+    $linksList = json_decode(qa_opt('useo_link_relations'), true);
+
+    $linkToRelMap = array_column($linksList, 'rel', 'url');
+
+    $html = preg_replace_callback('/<a([^>]*?)\shref="([^"]*)"([^>]*)>/i', function ($matches) use ($relTypes, $linkToRelMap) {
+        $domain = parse_url($matches[2], PHP_URL_HOST);
+
+        if (!isset($linkToRelMap[$domain])) {
+            return $matches[0];
+        }
+
+        // If configuration is not dofollow
+        if (isset($relTypes[$linkToRelMap[$domain]])) {
+            $rel = $relTypes[$linkToRelMap[$domain]];
+            $rel = sprintf(' rel="%s"', $rel);
+        } else { // If configuration is dofollow
+            $rel = '';
+        }
+
+        $newHtml = preg_replace('/<a([^>]*?)\srel="[^"]*?"([^>]*)>/i', sprintf('<a\1%s\2>', $rel), $matches[0]);
+        // If rel attribute has not been found in the original string
+        if ($newHtml === $matches[0] && $rel !== '') {
+            $newHtml = preg_replace('/(.*)>$/i', sprintf('\1%s>', $rel), $matches[0]);
+        }
+
+        return $newHtml;
+    }, $html);
+
+    return $html;
 }
 
 function useo_reset_settings()
@@ -54,9 +78,6 @@ function useo_reset_settings()
     qa_opt('useo_url_words_raw', $words);
     $words_list = implode(',', preg_split('/' . QA_PREG_BLOCK_WORD_SEPARATOR . '+/', $words, -1, PREG_SPLIT_NO_EMPTY));
     qa_opt('useo_url_words_list', $words_list);
-
-    // SEO Links section
-    qa_opt('useo_links_internal_dofollow', 1);
 
     // XML sitemap section
     qa_opt('useo_sitemap_question_count', 10000);
