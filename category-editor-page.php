@@ -4,15 +4,12 @@ class useo_category_editor_page
 {
     function match_request($request)
     {
-        $parts = explode('/', $request);
-
-        return $parts[0] === 'category-edit';
+        return qa_request_parts()[0] === 'category-edit';
     }
 
     function process_request($request)
     {
-        $parts = explode('/', $request);
-        $categoryid = $parts[1];
+        $categoryid = qa_request_parts()[1];
 
         $fullcategory = qa_db_select_with_pending(qa_db_full_category_selectspec($categoryid, true));
 

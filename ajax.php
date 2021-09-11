@@ -15,8 +15,6 @@ qa_set_request(qa_post_text('qa_request'), qa_post_text('qa_root'));
 
 require_once QA_INCLUDE_DIR . 'qa-app-options.php';
 require_once QA_INCLUDE_DIR . 'qa-db-metas.php';
-//require_once QA_INCLUDE_DIR.'qa-page.php';
-//qa_set_template('qa');
 $action = $_POST['action'];
 $data = $_POST['data'];
 $postid = $_POST['postid'];
@@ -33,6 +31,3 @@ if ($action == 'meta-save') {
         qa_db_postmeta_set($postid, 'useo-social-info', $data);
     }
 }
-/*
-	Omit PHP closing tag to help avoid accidental output
-*/

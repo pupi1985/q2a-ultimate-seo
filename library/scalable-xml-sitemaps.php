@@ -2,16 +2,6 @@
 
 class useo_scalable_xml_sitemaps
 {
-
-    var $directory;
-    var $urltoroot;
-
-    function load_module($directory, $urltoroot)
-    {
-        $this->directory = $directory;
-        $this->urltoroot = $urltoroot;
-    }
-
     function suggest_requests()
     {
         return array(
@@ -34,10 +24,7 @@ class useo_scalable_xml_sitemaps
 
     function match_request($request)
     {
-        //var_dump(substr($request, 8,strlen($request)-12) );
-        if ((substr($request, 0, 7) == 'sitemap') && (qa_opt('useo_sitemap_enable'))) {
-            return true;
-        }
+        return substr($request, 0, 7) === 'sitemap' && qa_opt('useo_sitemap_enable');
     }
 
     function process_request($request)
@@ -370,8 +357,3 @@ class useo_scalable_xml_sitemaps
     }
 
 }
-
-
-/*
-	Omit PHP closing tag to help avoid accidental output
-*/
