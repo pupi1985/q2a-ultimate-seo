@@ -845,7 +845,10 @@ class qa_html_theme_layer extends qa_html_theme_base
             return;
         }
 
-        if (!qa_admin_check_privileges($this->content)) {
+        // For qa_get_logged_in_level(), QA_USER_LEVEL_ADMIN
+        require_once QA_INCLUDE_DIR . 'app/posts.php';
+
+        if (qa_get_logged_in_level() < QA_USER_LEVEL_ADMIN) {
             return;
         }
 

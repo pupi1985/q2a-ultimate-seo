@@ -34,18 +34,17 @@ class useo_options
 
     function process_request($request)
     {
-        if (qa_get_logged_in_level() < QA_USER_LEVEL_ADMIN) {
-            $qa_content = qa_content_prepare();
-            $qa_content['error'] = "You don't have permission to access this page.";
+        // For qa_admin_check_privileges()
+        require_once QA_INCLUDE_DIR . 'app/admin.php';
 
+        $qa_content = qa_content_prepare();
+
+        if (!qa_admin_check_privileges($qa_content)) {
             return $qa_content;
         }
-        global $qa_modules;
-        $qa_content = qa_content_prepare();
-        $qa_content['site_title'] = "Q2A Ultimate SEO by QA-Themes.com ";
-        $qa_content['title'] = "Ultimate SEO";
-        $qa_content['error'] = "";
-        $qa_content['suggest_next'] = "";
+
+        $qa_content['site_title'] = 'Q2A Ultimate SEO by QA-Themes.com';
+        $qa_content['title'] = 'Ultimate SEO';
 
         if (!isset($qa_content['body_footer'])) {
             $qa_content['body_footer'] = '';
