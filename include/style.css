@@ -20,7 +20,7 @@ input[type=checkbox] {
 
 h2 {
     background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
-    border-color: -moz-use-text-color -moz-use-text-color #ddd;
+    border-color: #ddd;
     border-image: none;
     border-radius: 0;
     border-style: none none solid;
@@ -183,4 +183,10 @@ h2 {
     float: left;
     font-size: 70%;
     width: 100%;
+}
+
+.qa-theme-snowflat .qa-form-tall-ok {
+    margin-right: 2%;
+    margin-left: 0;
+    display: block;
 }
