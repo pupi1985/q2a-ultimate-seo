@@ -458,25 +458,25 @@ class qa_html_theme_layer extends qa_html_theme_base
                 $this->content['description'] = qa_html($this->meta_description);
             } // if there was no custom meta description and it's supposed to read it from answers do it, otherwise don't change it
             else if (qa_opt('useo_meta_desc_ans_enable')) {
-                $lenght = (int)qa_opt('useo_meta_desc_length');
-                if ($lenght <= 0) {
-                    $lenght = 160;
+                $length = (int)qa_opt('useo_meta_desc_length');
+                if ($length <= 0) {
+                    $length = 160;
                 }
                 $text = '';
-                if (($this->content['q_view']['raw']['acount'] > 0) && (qa_opt('useo_meta_desc_ans_enable'))) {
+                if (((int)$this->content['q_view']['raw']['acount'] > 0) && (qa_opt('useo_meta_desc_ans_enable'))) {
                     // get Selected Answer's content
-                    if ((isset($this->content["q_view"]["raw"]["selchildid"])) && (qa_opt('useo_meta_desc_sel_ans_enable'))) {
+                    if ((isset($this->content['q_view']['raw']['selchildid'])) && (qa_opt('useo_meta_desc_sel_ans_enable'))) {
                         foreach ($this->content['a_list']['as'] as $answer) {
                             if ($answer['raw']['isselected']) {
-                                $text = $answer['raw']['content'];
+                                $text = qa_viewer_text($answer['raw']['content'], $answer['raw']['format']);
                             }
                         }
                     } else {
                         // get most voted Answer's content
                         $max_vote = 0; // don't use answers with negative votes.
                         foreach ($this->content['a_list']['as'] as $answer) {
-                            if ($answer['raw']['netvotes'] > $max_vote) {
-                                $text = $answer['raw']['content'];
+                            if ($answer['raw']['netvotes'] >= $max_vote) {
+                                $text = qa_viewer_text($answer['raw']['content'], $answer['raw']['format']);
                                 $max_vote = $answer['raw']['netvotes'];
                             }
                         }
@@ -484,12 +484,11 @@ class qa_html_theme_layer extends qa_html_theme_base
                 }
                 if (!(empty($text))) {
                     global $qa_sanitize_html_newwindow;
-                    $excerpt = useo_get_excerpt(qa_sanitize_html($text, $qa_sanitize_html_newwindow), 0, $lenght);
-                    $this->content['description'] = $excerpt;
+                    $this->content['description'] = qa_html(useo_get_excerpt(qa_sanitize_html($text, $qa_sanitize_html_newwindow), 0, $length));
                 }
             }
             // Meta Tags and social meta tags
-            if ($this->template == 'question' || $this->template == 'qa') {
+            if ($this->template === 'question' || $this->template === 'qa') {
                 if (qa_opt('useo_social_enable_editor')) {
                     foreach ($this->metas as $key => $value) {
                         if (isset($this->social_metas[$key])) {
@@ -500,7 +499,7 @@ class qa_html_theme_layer extends qa_html_theme_base
                     }
 
                 } else if (qa_opt('useo_social_og_enable_auto')) {
-                    foreach ($this->metas as $key => $value) {
+                    foreach ($this->metas as $value) {
                         $this->output('<meta ' . $value['type'] . ($value['content'] ? ' content="' . $value['content'] . '"' : '') . ' /> ');
                     }
                 }

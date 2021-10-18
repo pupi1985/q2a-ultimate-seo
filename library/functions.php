@@ -137,16 +137,15 @@ function useo_reset_settings()
 
 function useo_get_excerpt($str, $startPos = 0, $maxLength = 160)
 {
-    if (strlen($str) > $maxLength) {
-        $excerpt = substr($str, $startPos, $maxLength - 3);
-        $lastSpace = strrpos($excerpt, ' ');
-        $excerpt = substr($excerpt, 0, $lastSpace);
-        $excerpt .= '...';
-    } else {
-        $excerpt = $str;
-    }
+    require_once QA_INCLUDE_DIR . 'util/string.php';
 
-    return $excerpt;
+    if (qa_strlen($str) > $maxLength) {
+        $excerpt = qa_substr($str, $startPos, $maxLength - 3);
+
+        return rtrim($excerpt) . '...';
+    } else {
+        return $str;
+    }
 }
 
 /**
