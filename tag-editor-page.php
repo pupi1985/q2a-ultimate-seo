@@ -24,10 +24,10 @@ class useo_tag_editor_page
             return $qa_content;
         }
 
-        require_once QA_INCLUDE_DIR . 'qa-db-metas.php';
+        require_once QA_INCLUDE_DIR . 'db/metas.php';
 
         if (qa_clicked('dosave')) {
-            require_once QA_INCLUDE_DIR . 'qa-util-string.php';
+            require_once QA_INCLUDE_DIR . 'util/string.php';
 
             $taglc = qa_strtolower($tag);
             qa_db_tagmeta_set($taglc, 'title', qa_post_text('tagtitle'));

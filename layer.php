@@ -11,7 +11,7 @@ class qa_html_theme_layer extends qa_html_theme_base
     function doctype()
     {
         qa_html_theme_base::doctype();
-        require_once QA_INCLUDE_DIR . 'qa-db-metas.php';
+        require_once QA_INCLUDE_DIR . 'db/metas.php';
         // Custom Meta(title,description,keywords)
         if (($this->template == 'question') and (qa_opt('useo_meta_editor_enable'))) {
             $metas = json_decode(qa_db_postmeta_get($this->content['q_view']['raw']['postid'], 'useo-meta-info'), true);
@@ -722,7 +722,7 @@ class qa_html_theme_layer extends qa_html_theme_base
 
     function post_tag_item($taghtml, $class)
     {
-        require_once QA_INCLUDE_DIR . 'qa-util-string.php';
+        require_once QA_INCLUDE_DIR . 'util/string.php';
         global
         $useo_tag_desc_list, // Already filled in qa-tag-desc-overrides.php  -  All tags used in this page are listed in this array
         $plugin_tag_map;       // here it will be filled with tag's meta descriptions

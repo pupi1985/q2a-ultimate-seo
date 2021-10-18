@@ -25,9 +25,9 @@ class useo_category_editor_page
             return $qa_content;
         }
 
-        require_once QA_INCLUDE_DIR . 'qa-db-metas.php';
+        require_once QA_INCLUDE_DIR . 'db/metas.php';
         if (qa_clicked('dosave')) {
-            require_once QA_INCLUDE_DIR . 'qa-util-string.php';
+            require_once QA_INCLUDE_DIR . 'util/string.php';
 
             qa_db_categorymeta_set($categoryid, 'useo_cat_title', qa_post_text('useo_cat_title'));
             qa_db_categorymeta_set($categoryid, 'useo_cat_description', qa_post_text('useo_cat_description'));

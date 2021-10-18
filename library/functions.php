@@ -41,7 +41,7 @@ function updateRelAttributeFromHtml($html)
 
 function useo_reset_settings()
 {
-    require_once QA_INCLUDE_DIR . 'qa-app-options.php';
+    require_once QA_INCLUDE_DIR . 'app/options.php';
 
     // Title section
     qa_opt('useo_title_qa', '');

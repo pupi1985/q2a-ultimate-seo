@@ -13,8 +13,8 @@ qa_report_process_stage('init_ajax');
 //	Get general Ajax parameters from the POST payload, and clear $_GET
 qa_set_request(qa_post_text('qa_request'), qa_post_text('qa_root'));
 
-require_once QA_INCLUDE_DIR . 'qa-app-options.php';
-require_once QA_INCLUDE_DIR . 'qa-db-metas.php';
+require_once QA_INCLUDE_DIR . 'app/options.php';
+require_once QA_INCLUDE_DIR . 'db/metas.php';
 $action = $_POST['action'];
 $data = $_POST['data'];
 $postid = $_POST['postid'];

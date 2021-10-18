@@ -15,7 +15,7 @@ function qa_q_request($questionid, $title)
         //$title = str_replace($word_list, '', $raw_title);
 
         // ~~preg_replace method with Q2A functions
-        require_once QA_INCLUDE_DIR . 'qa-util-string.php';
+        require_once QA_INCLUDE_DIR . 'util/string.php';
         $word_list = qa_block_words_to_preg($words);
         $title = trim(qa_block_words_replace($title, $word_list, ''));
 
@@ -60,7 +60,7 @@ function qa_tag_html($tag, $microformats = false, $favorited = false)
     }
     // Tag Description
     global $useo_tag_desc_list;
-    require_once QA_INCLUDE_DIR . 'qa-util-string.php';
+    require_once QA_INCLUDE_DIR . 'util/string.php';
 
     $taglc = qa_strtolower($tag);
     $useo_tag_desc_list[$taglc] = true;

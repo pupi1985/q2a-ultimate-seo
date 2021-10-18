@@ -62,7 +62,7 @@ class useo_category_widget
             echo "request: <pre>"; var_dump($request); echo "</pre>";
             */
 
-            require_once QA_INCLUDE_DIR . 'qa-db-metas.php';
+            require_once QA_INCLUDE_DIR . 'db/metas.php';
 
             $description = qa_db_categorymeta_get($categoryid, 'useo_cat_description');
             if (!(qa_opt('useo_cat_desc_format'))) {

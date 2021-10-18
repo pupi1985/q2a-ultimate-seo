@@ -15,7 +15,7 @@ class useo_tag_widget
 
     function output_widget($region, $place, $themeobject, $template, $request, $qa_content)
     {
-        require_once QA_INCLUDE_DIR . 'qa-db-metas.php';
+        require_once QA_INCLUDE_DIR . 'db/metas.php';
 
         $parts = explode('/', $request);
         $tag = $parts[1];
