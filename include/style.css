@@ -39,7 +39,7 @@ h2 {
     float: right;
 }
 
-.qseo-buttons-container {
+.useo-buttons-container {
     display: flex;
     justify-content: space-evenly;
 }
@@ -173,7 +173,7 @@ h2 {
 
 /*Here your can change the breakpoint to set the accordion, when screen resolution changed*/
 @media only screen and (min-width: 768px) {
-    .qseo-buttons-container {
+    .useo-buttons-container {
         margin-left: 30%;
     }
 }

@@ -5,6 +5,10 @@ $(document).ready(function() {
         tabidentify: 'tab_identifier_child',
         fit: true
     });
+
+    $('#useo').submit(function(event) {
+        $(this).attr('action', window.location.href);
+    });
 });
 
 function addNetworkSite() {

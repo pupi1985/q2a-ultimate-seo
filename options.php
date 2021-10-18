@@ -184,7 +184,7 @@ class useo_options
         }
         global $qa_modules;
         $output .= '
-			<form name="useo" action="' . qa_self_html() . '" method="post">
+			<form name="useo" id="useo" action="' . qa_self_html() . '" method="post">
 				<div id="verticalTab">
 					<ul class="resp-tabs-list tab_identifier_child">
 						<li class="tab_identifier_child">Title<span>Page Title Customizations</span></li>
@@ -227,7 +227,7 @@ class useo_options
 						</div>  
 					</div>
 				</div>
-				<section class="qseo-buttons-container">
+				<section class="useo-buttons-container">
 					<input class="qa-form-tall-button qa-form-tall-button-save useo-right" type="submit" title="" value="Save Changes" name="useo_save">
 					<input class="qa-form-tall-button" type="submit" title="" value="Reset Settings" name="useo_reset">
 				</section>
