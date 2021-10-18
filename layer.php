@@ -543,7 +543,7 @@ class qa_html_theme_layer extends qa_html_theme_base
 					</tr>
 					<tr>
 						<td class="qa-form-tall-data">
-							<textarea placeholder="' . qa_html($this->content['description']) . '" id="useo-meta-editor-description" class="qa-form-tall-text" cols="40" rows="3" name="useo-meta-editor-description">' . $this->meta_description . '</textarea>
+							<textarea placeholder="' . qa_html((isset($this->content['description']) ? $this->content['description'] : '')) . '" id="useo-meta-editor-description" class="qa-form-tall-text" cols="40" rows="3" name="useo-meta-editor-description">' . $this->meta_description . '</textarea>
 						</td>
 					</tr>
 				</tbody>
@@ -555,7 +555,7 @@ class qa_html_theme_layer extends qa_html_theme_base
 					</tr>
 					<tr>
 						<td class="qa-form-tall-data">
-							<input placeholder="' . $this->content['keywords'] . '" id="useo-meta-editor-keywords" class="qa-form-tall-text" type="text" value="' . $this->meta_keywords . '" name="useo-meta-editor-keywords">
+							<input placeholder="' . (isset($this->content['keywords']) ? $this->content['keywords'] : '') . '" id="useo-meta-editor-keywords" class="qa-form-tall-text" type="text" value="' . $this->meta_keywords . '" name="useo-meta-editor-keywords">
 							<div class="qa-form-tall-note">A comma separated list of your most important keywords</div>
 						</td>
 					</tr>
