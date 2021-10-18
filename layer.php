@@ -10,7 +10,7 @@ class qa_html_theme_layer extends qa_html_theme_base
 
     function doctype()
     {
-        qa_html_theme_base::doctype();
+        parent::doctype();
         require_once QA_INCLUDE_DIR . 'db/metas.php';
         // Custom Meta(title,description,keywords)
         if (($this->template == 'question') and (qa_opt('useo_meta_editor_enable'))) {
@@ -102,7 +102,7 @@ class qa_html_theme_layer extends qa_html_theme_base
                     $this->metas['tc-image']['type'] = 'property="twitter:image"';
                 }
                 // handler
-                // twitter handler goes into "site" field of meta tag
+                // twitter handler goes into 'site' field of meta tag
                 $tc_handler = qa_opt('useo_social_tc_handler');
                 if (!empty($tc_handler)) {
                     $this->metas['tc-handler']['content'] = $tc_handler;
@@ -142,13 +142,13 @@ class qa_html_theme_layer extends qa_html_theme_base
         if (isset($this->content['navigation']['cat']) && qa_opt('useo_cat_title_nav_enable')) {
             $category_nav = $this->content['navigation']['cat'];
             unset($category_nav['all']);
-            foreach ($category_nav as $index => $item) {
+            foreach ($category_nav as $item) {
                 $categoryid_list[$item['categoryid']] = $item['categoryid'];
             }
         }
         // prepare question list ids
-        if (isset($this->content["q_list"]["qs"]) && qa_opt('useo_cat_title_qlist_enable')) {
-            foreach ($this->content["q_list"]["qs"] as $index => $item) {
+        if (isset($this->content['q_list']['qs']) && qa_opt('useo_cat_title_qlist_enable')) {
+            foreach ($this->content['q_list']['qs'] as $item) {
                 if ($item['raw']['categoryid']) {
                     $categoryid_list[$item['raw']['categoryid']] = $item['raw']['categoryid'];
                 }
@@ -161,10 +161,10 @@ class qa_html_theme_layer extends qa_html_theme_base
                 $categoryid_list, 'useo_cat_title'
             );
             $useo_cat_desc_map = qa_db_read_all_assoc($result, 'categoryid');
-            if (isset($this->content["q_list"]["qs"])) {
-                foreach ($this->content["q_list"]["qs"] as $index => $item) {
+            if (isset($this->content['q_list']['qs'])) {
+                foreach ($this->content['q_list']['qs'] as $index => $item) {
                     if (isset($item['raw']['categoryid']) && isset($useo_cat_desc_map[$item['raw']['categoryid']])) {
-                        $this->content["q_list"]["qs"][$index]['where']['title'] = $useo_cat_desc_map[$item['raw']['categoryid']]['content'];
+                        $this->content['q_list']['qs'][$index]['where']['title'] = $useo_cat_desc_map[$item['raw']['categoryid']]['content'];
                     }
                 }
             }
@@ -173,7 +173,7 @@ class qa_html_theme_layer extends qa_html_theme_base
         if (!empty($this->content['navigation']['cat']) && qa_opt('useo_cat_title_nav_enable')) {
             foreach ($this->content['navigation']['cat'] as $index => $item) {
                 if (isset($item['categoryid']) && isset($useo_cat_desc_map[$item['categoryid']])) {
-                    $this->content['navigation']['cat'][$index]["popup"] = $useo_cat_desc_map[$item['categoryid']]['content'];
+                    $this->content['navigation']['cat'][$index]['popup'] = $useo_cat_desc_map[$item['categoryid']]['content'];
                 }
             }
         }
@@ -188,7 +188,7 @@ class qa_html_theme_layer extends qa_html_theme_base
         if (strlen(@$this->content['meta_title'])) {
             $this->output('<meta name="title" content="' . $this->content['meta_title'] . '"/>');
         }
-        qa_html_theme_base::head_metas();
+        parent::head_metas();
         if (qa_opt('useo_cat_canonical_enable')) {
             $cat_slugs = useo_get_current_category_slug();
             if ($cat_slugs) { // it's a category page
@@ -200,19 +200,17 @@ class qa_html_theme_layer extends qa_html_theme_base
 
     function head_script()
     {
-        qa_html_theme_base::head_script();
-        if ($this->template == 'question' && (qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN)) {
-            $variables = '';
-            $variables .= 'useo_ajax_url = "' . QA_HTML_THEME_LAYER_URLTOROOT . 'ajax.php";';
+        parent::head_script();
+        if ($this->template === 'question' && (int)qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN) {
+            $variables = 'useo_ajax_url = "' . QA_HTML_THEME_LAYER_URLTOROOT . 'ajax.php";';
             $variables .= 'useo_postid = ' . $this->content['q_view']['raw']['postid'] . ';';
-            $this->output('<script>' . $variables . '</script>');
-            $this->output('<script src="' . QA_HTML_THEME_LAYER_URLTOROOT . 'include/seo-forms.js" type="text/javascript"></script>');
+            echo '<script>' . $variables . '</script>';
+            echo '<script src="' . QA_HTML_THEME_LAYER_URLTOROOT . 'include/seo-forms.js"></script>';
         }
     }
 
     function head_title()
     {
-
         // Title Customization Options
         $title = '';
         $requestParts = explode('/', $this->request);
@@ -227,8 +225,8 @@ class qa_html_theme_layer extends qa_html_theme_base
                 break;
             case 'question':
                 $category_name = '';
-                if ((isset($this->content["categoryids"])) && (!(empty($this->content["categoryids"])))) {
-                    $category_name = $this->content["q_view"]["raw"]["categoryname"];
+                if (!empty($this->content['categoryids'])) {
+                    $category_name = $this->content['q_view']['raw']['categoryname'];
                 }
 
                 if (empty($this->meta_title)) {
@@ -246,8 +244,8 @@ class qa_html_theme_layer extends qa_html_theme_base
                 break;
             case 'questions':
                 $category_name = '';
-                if (is_array($requestParts) && count($requestParts) > 1 && !empty($this->content["q_list"]["qs"])) {
-                    $category_name = $this->content["q_list"]["qs"][0]["raw"]["categoryname"];
+                if (is_array($requestParts) && count($requestParts) > 1 && !empty($this->content['q_list']['qs'])) {
+                    $category_name = $this->content['q_list']['qs'][0]['raw']['categoryname'];
                 }
                 $sort = qa_get('sort');
                 if (empty($sort)) {
@@ -286,11 +284,12 @@ class qa_html_theme_layer extends qa_html_theme_base
                         $title = str_replace($search, $replace, $title_template);
                     }
                 }
+                break;
             case 'unanswered':
                 $sort = qa_get('by');
                 $category_name = '';
-                if (is_array($requestParts) && count($requestParts) > 1 && !empty($this->content["q_list"]["qs"])) {
-                    $category_name = $this->content["q_list"]["qs"][0]["raw"]["categoryname"];
+                if (is_array($requestParts) && count($requestParts) > 1 && !empty($this->content['q_list']['qs'])) {
+                    $category_name = $this->content['q_list']['qs'][0]['raw']['categoryname'];
                 }
 
                 if (empty($sort)) {
@@ -320,8 +319,8 @@ class qa_html_theme_layer extends qa_html_theme_base
                 $title_template = qa_opt('useo_title_activity');
                 if (!empty($title_template)) {
                     $category_name = '';
-                    if (is_array($requestParts) && count($requestParts) > 1 && !empty($this->content["q_list"]["qs"])) {
-                        $category_name = $this->content["q_list"]["qs"][0]["raw"]["categoryname"];
+                    if (is_array($requestParts) && count($requestParts) > 1 && !empty($this->content['q_list']['qs'])) {
+                        $category_name = $this->content['q_list']['qs'][0]['raw']['categoryname'];
                     }
 
                     $search = array('%site-title%', '%recent-activity-title%', '%category-name%');
@@ -393,7 +392,7 @@ class qa_html_theme_layer extends qa_html_theme_base
         }
 
         if (empty($title)) {
-            qa_html_theme_base::head_title();
+            parent::head_title();
         } else {
             $this->output('<title>' . $title . '</title>');
         }
@@ -509,14 +508,18 @@ class qa_html_theme_layer extends qa_html_theme_base
 
     function main_parts($content)
     {
-        qa_html_theme_base::main_parts($content);
+        parent::main_parts($content);
 
-        if ((qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN) && ($this->template == 'question') && (qa_opt('useo_meta_editor_enable'))) {
+        if ((int)qa_get_logged_in_level() < QA_USER_LEVEL_ADMIN || $this->template !== 'question') {
+            return;
+        }
 
-            $this->output('<div class="qa-widgets-main qa-widgets-main-low">');
-            $this->output('<form name="useo-meta-editor" action="' . qa_self_html() . '" method="post">');
-            $this->output('
-			<h2> Page Title And Meta Tags </h2>
+        if (qa_opt('useo_meta_editor_enable')) {
+            echo '
+            <div class="qa-widgets-main qa-widgets-main-low">
+            <form name="useo-meta-editor" action="' . qa_self_html() . '" method="post">
+			
+			<h2>Page Title And Meta Tags</h2>
 			<strong>Only administrators can see this section.</strong>
 			<table class="qa-form-tall-table">
 				<tbody>
@@ -565,16 +568,16 @@ class qa_html_theme_layer extends qa_html_theme_base
 					</tr>
 				</tbody>
 			</table>
-			');
-            $this->output('</form>');
-            $this->output('<hr /></div>');
+            </form>
+            <hr/></div>';
         }
-        if ((qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN) && ($this->template == 'question') && (qa_opt('useo_social_enable_editor'))) {
 
-            $this->output('<div class="qa-widgets-main qa-widgets-main-low">');
-            $this->output('<form name="useo-meta-editor" action="' . qa_self_html() . '" method="post">');
-            $this->output('
-			<h2> Social Tags Editor </h2>
+        if (qa_opt('useo_social_enable_editor')) {
+            echo '
+            <div class="qa-widgets-main qa-widgets-main-low">
+            <form name="useo-meta-editor" action="' . qa_self_html() . '" method="post">
+			
+			<h2>Social Tags Editor</h2>
 			<p>Only administrators can see this section.</p>
 			<h3>Open Graph</h3>
 			<table class="qa-form-tall-table">
@@ -639,6 +642,7 @@ class qa_html_theme_layer extends qa_html_theme_base
 					</tr>
 				</tbody>
 			</table>
+			
 			<h3>Twitter Cards</h3>
 			<table class="qa-form-tall-table">
 				<tbody>
@@ -690,6 +694,7 @@ class qa_html_theme_layer extends qa_html_theme_base
 					</tr>
 				</tbody>
 			</table>
+			
 			<h3>Google+ Schemas</h3>
 			<table class="qa-form-tall-table">
 				<tbody>
@@ -713,11 +718,9 @@ class qa_html_theme_layer extends qa_html_theme_base
 				</tbody>
 
 			</table>
-			');
-            $this->output('</form>');
-            $this->output('<hr /></div>');
+            </form>
+            <hr /></div>';
         }
-
     }
 
     function post_tag_item($taghtml, $class)
@@ -771,7 +774,7 @@ class qa_html_theme_layer extends qa_html_theme_base
             }
             $taghtml = $html->saveHTML($a);
         }
-        qa_html_theme_base::post_tag_item($taghtml, $class);
+        parent::post_tag_item($taghtml, $class);
     }
 
     // category link titles
@@ -785,7 +788,7 @@ class qa_html_theme_layer extends qa_html_theme_base
             }
             $post['where']['data'] = str_replace('<a', '<a title="' . substr($post['where']['title'], 0, $max_len) . '" ', $post['where']['data']);
         }
-        qa_html_theme_base::post_meta_where($post, $class);
+        parent::post_meta_where($post, $class);
     }
 
     function ranking($ranking)
@@ -836,7 +839,7 @@ class qa_html_theme_layer extends qa_html_theme_base
                 }
             }
         }
-        qa_html_theme_base::ranking($ranking);
+        parent::ranking($ranking);
     }
 
     private function adminMenuItem()
