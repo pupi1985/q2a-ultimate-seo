@@ -13,14 +13,14 @@ class qa_html_theme_layer extends qa_html_theme_base
         parent::doctype();
         require_once QA_INCLUDE_DIR . 'db/metas.php';
         // Custom Meta(title,description,keywords)
-        if (($this->template == 'question') and (qa_opt('useo_meta_editor_enable'))) {
+        if ($this->template === 'question' && qa_opt('useo_meta_editor_enable') && isset($this->content['q_view'])) {
             $metas = json_decode(qa_db_postmeta_get($this->content['q_view']['raw']['postid'], 'useo-meta-info'), true);
             if (is_array($metas)) {
                 $this->meta_title = qa_html(@$metas['title']);
                 $this->meta_description = qa_html(@$metas['description']);
                 $this->meta_keywords = qa_html(@$metas['keywords']);
             }
-        } else if ($this->template == 'qa') {
+        } else if ($this->template === 'qa') {
             $this->meta_title = qa_opt('useo_meta_home_title');
             $this->meta_description = qa_opt('home_description'); // native option
             $this->meta_keywords = qa_opt('useo_meta_home_keywords');
@@ -41,7 +41,7 @@ class qa_html_theme_layer extends qa_html_theme_base
             $title = qa_html(@$this->content['q_view']['raw']['title']);
         }
 
-        if ($this->template === 'question' && qa_opt('useo_social_enable_editor') && isset($this->content['q_view']['raw'])) {
+        if ($this->template === 'question' && qa_opt('useo_social_enable_editor') && isset($this->content['q_view'])) {
             $this->social_metas = json_decode(qa_db_postmeta_get($this->content['q_view']['raw']['postid'], 'useo-social-info'), true);
             if (is_array($this->social_metas)) {
                 foreach ($this->social_metas as $index => $variable) {
@@ -201,7 +201,7 @@ class qa_html_theme_layer extends qa_html_theme_base
     function head_script()
     {
         parent::head_script();
-        if ($this->template === 'question' && (int)qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN) {
+        if ($this->template === 'question' && (int)qa_get_logged_in_level() >= QA_USER_LEVEL_ADMIN && isset($this->content['q_view'])) {
             $variables = 'useo_ajax_url = "' . QA_HTML_THEME_LAYER_URLTOROOT . 'ajax.php";';
             $variables .= 'useo_postid = ' . $this->content['q_view']['raw']['postid'] . ';';
             echo '<script>' . $variables . '</script>';
@@ -225,7 +225,7 @@ class qa_html_theme_layer extends qa_html_theme_base
                 break;
             case 'question':
                 $category_name = '';
-                if (!empty($this->content['categoryids'])) {
+                if (!empty($this->content['categoryids']) && isset($this->content['q_view'])) {
                     $category_name = $this->content['q_view']['raw']['categoryname'];
                 }
 
@@ -407,7 +407,7 @@ class qa_html_theme_layer extends qa_html_theme_base
         } else {
             // if page is not already noindex, check if it needs to be noindex. also add nofollow if necessary
             $status = 1; // content is long enough
-            if (($this->template == 'question') && (qa_opt('useo_access_length_enable')) && ((int)qa_opt('useo_access_length') > 0)) {
+            if ($this->template === 'question' && isset($this->content['q_view']) && qa_opt('useo_access_length_enable') && (int)qa_opt('useo_access_length') > 0) {
                 $status = 0;
                 $minimum_words = (int)qa_opt('useo_access_length');
                 $word_count = str_word_count($this->content['q_view']['raw']['title']) + str_word_count($this->content['q_view']['raw']['content']);
@@ -447,7 +447,7 @@ class qa_html_theme_layer extends qa_html_theme_base
             }
         }
         // Question Meta tags
-        if ($this->template == 'question') {
+        if ($this->template == 'question' && isset($this->content['q_view'])) {
             // setup custom meta keyword
             if (!empty($this->meta_keywords)) {
                 $this->content['keywords'] = qa_html($this->meta_keywords);
@@ -530,7 +530,7 @@ class qa_html_theme_layer extends qa_html_theme_base
 					</tr>
 					<tr>
 						<td class="qa-form-tall-data">
-							<input placeholder="' . qa_html($this->content['q_view']['raw']['title']) . '" id="useo-meta-editor-title" class="qa-form-tall-text" type="text" value="' . $this->meta_title . '" name="useo-meta-editor-title">
+							<input placeholder="' . qa_html(@$this->content['q_view']['raw']['title']) . '" id="useo-meta-editor-title" class="qa-form-tall-text" type="text" value="' . $this->meta_title . '" name="useo-meta-editor-title">
 						</td>
 					</tr>
 				</tbody>
