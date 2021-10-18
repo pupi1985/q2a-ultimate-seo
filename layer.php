@@ -41,16 +41,17 @@ class qa_html_theme_layer extends qa_html_theme_base
             $title = qa_html(@$this->content['q_view']['raw']['title']);
         }
 
-        if ($this->template === 'question' || $this->template === 'qa') {
-            if (qa_opt('useo_social_enable_editor')) {
-                $this->social_metas = json_decode(qa_db_postmeta_get($this->content['q_view']['raw']['postid'], 'useo-social-info'), true);
-                if (is_array($this->social_metas)) {
-                    foreach ($this->social_metas as $index => $variable) {
-                        $this->metas[$index]['content'] = qa_html($variable);
-                        $this->metas[$index]['type'] = '';
-                    }
+        if ($this->template === 'question' && qa_opt('useo_social_enable_editor') && isset($this->content['q_view']['raw'])) {
+            $this->social_metas = json_decode(qa_db_postmeta_get($this->content['q_view']['raw']['postid'], 'useo-social-info'), true);
+            if (is_array($this->social_metas)) {
+                foreach ($this->social_metas as $index => $variable) {
+                    $this->metas[$index]['content'] = qa_html($variable);
+                    $this->metas[$index]['type'] = '';
                 }
             }
+        }
+
+        if ($this->template === 'question' || $this->template === 'qa') {
             if (qa_opt('useo_social_og_enable_auto')) { // Open Graph
                 // site name
                 $this->metas['og-sitename']['content'] = @$this->content['site_title'];
