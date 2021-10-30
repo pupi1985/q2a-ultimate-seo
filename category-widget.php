@@ -41,7 +41,7 @@ class useo_category_widget
         */
 
         $slugs = useo_get_current_category_slug();
-        $countslugs = count($slugs);
+        $countslugs = is_array($slugs) ? count($slugs) : 0;
 
         list($categories, $categoryid) = qa_db_select_with_pending(
             qa_db_category_nav_selectspec($slugs, false, false, true),
