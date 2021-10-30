@@ -11,6 +11,7 @@ require_once 'library/functions.php';
 qa_register_plugin_module('page', 'options.php', 'useo_options', 'Ultimate SEO Options');
 
 qa_register_plugin_layer('layer.php', 'Ultimate SEO Layer');
+qa_register_plugin_layer('AdminMenuLayer.php', 'Ultimate SEO Admin Menu Layer');
 
 qa_register_plugin_overrides('overrides.php');
 
