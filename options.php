@@ -100,8 +100,6 @@ class useo_options
             // URLs section
             qa_opt('useo_url_cleanup', (int)qa_post_text('useo_url_cleanup'));
             qa_opt('useo_url_dont_make_empty', (int)qa_post_text('useo_url_dont_make_empty'));
-            qa_opt('useo_url_q_uppercase', (int)qa_post_text('useo_url_q_uppercase'));
-            qa_opt('useo_url_tag_uppercase', (int)qa_post_text('useo_url_tag_uppercase'));
             qa_opt('useo_url_q_uppercase_type', (int)qa_post_text('useo_url_q_uppercase_type'));
             qa_opt('useo_url_tag_uppercase_type', (int)qa_post_text('useo_url_tag_uppercase_type'));
             $words = qa_post_text('useo_url_words_raw');

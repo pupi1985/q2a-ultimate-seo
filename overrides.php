@@ -6,6 +6,9 @@ if (!defined('QA_VERSION')) { // don't allow this page to be requested directly 
 
 function qa_q_request($questionid, $title)
 {
+    // For qa_string_to_words(), qa_block_words_to_preg(), qa_block_words_replace(), qa_strlen()
+    require_once QA_INCLUDE_DIR . 'util/string.php';
+
     // URL Clean
     if (qa_opt('useo_url_cleanup')) { //clean url's title
         $words = qa_opt('useo_url_words_list');
@@ -15,58 +18,47 @@ function qa_q_request($questionid, $title)
         //$title = str_replace($word_list, '', $raw_title);
 
         // ~~preg_replace method with Q2A functions
-        require_once QA_INCLUDE_DIR . 'util/string.php';
         $word_list = qa_block_words_to_preg($words);
         $title = trim(qa_block_words_replace($title, $word_list, ''));
 
-        if ((strlen($title) == 0) && (qa_opt('useo_url_dont_make_empty'))) {
+        if ((qa_strlen($title) == 0) && (qa_opt('useo_url_dont_make_empty'))) {
             $title = $raw_title;
         }
     }
 
+    // URL Customization
+    $type = (int)qa_opt('useo_url_q_uppercase_type');
     $url = qa_q_request_base($questionid, $title);
-
-    // capitalize letters
-    if (qa_opt('useo_url_q_uppercase')) {
-        $type = qa_opt('useo_url_q_uppercase_type');
-        if ($type == 1) { // first word's first letter
-            $parts = explode('/', $url);
-            $parts[1] = ucfirst($parts[1]);
-            $url = implode('/', $parts);
-        } else if ($type == 2) // all word's first letter
-        {
-            $url = str_replace(' ', '?', ucwords(str_replace('?', ' ', str_replace(' ', '/', ucwords(str_replace('/', ' ', str_replace(' ', '-', ucwords(str_replace('-', ' ', strtolower($url))))))))));
-        } else // whole words
-        {
-            $url = strtoupper($url);
-        }
+    if ($type === 0) { // early return, if possible
+        return $url;
     }
 
-    return $url;
+    $parts = explode('/', $url);
+    $parts[1] = useo_capitalize($type, $parts[1]);
+
+    return implode('/', $parts);
 }
 
-function qa_tag_html($tag, $microformats = false, $favorited = false)
+function qa_tag_html($tag, $microdata = false, $favorited = false)
 {
+    // For qa_string_to_words(), qa_strtolower()
+    require_once QA_INCLUDE_DIR . 'util/string.php';
+
     // URL Customization
-    $type = qa_opt('useo_url_tag_uppercase_type');
-    if ($type == 1) { // first word's first letter
-        $taglink = ucfirst($tag);
-    } else if ($type == 2) // all word's first letter
-    {
-        $taglink = str_replace(' ', '?', ucwords(str_replace('?', ' ', str_replace(' ', '/', ucwords(str_replace('/', ' ', str_replace(' ', '-', ucwords(str_replace('-', ' ', strtolower($tag))))))))));
-    } else // whole words
-    {
-        $taglink = strtoupper($tag);
-    }
+    $type = (int)qa_opt('useo_url_tag_uppercase_type');
+    $taglink = useo_capitalize($type, $tag);
+
     // Tag Description
     global $useo_tag_desc_list;
-    require_once QA_INCLUDE_DIR . 'util/string.php';
 
     $taglc = qa_strtolower($tag);
     $useo_tag_desc_list[$taglc] = true;
 
-    return '<a href="' . qa_path_html('tag/' . $taglink) . '"' . ($microformats ? ' rel="tag"' : '') . ' class="qa-tag-link' .
-        ($favorited ? ' qa-tag-favorited' : '') . '">' . qa_html($tag) . '</a>';
+    $url = qa_path_html('tag/' . $taglink);
+    $attrs = $microdata ? ' rel="tag"' : '';
+    $class = $favorited ? ' qa-tag-favorited' : '';
+
+    return '<a href="' . $url . '"' . $attrs . ' class="qa-tag-link' . $class . '">' . qa_html($tag) . '</a>';
 }
 
 function qa_sanitize_html($html, $linksnewwindow = false, $storage = false)
