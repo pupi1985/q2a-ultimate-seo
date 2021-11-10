@@ -48,16 +48,19 @@ function qa_q_request($questionid, $title)
 function qa_tag_html($tag, $microformats = false, $favorited = false)
 {
     // URL Customization
-    $type = qa_opt('useo_url_tag_uppercase_type');
-    if ($type == 1) { // first word's first letter
-        $taglink = ucfirst($tag);
-    } else if ($type == 2) // all word's first letter
-    {
+    if(qa_opt('useo_url_tag_uppercase')) {
+      $type = qa_opt('useo_url_tag_uppercase_type');
+      if ($type == 1) { // first word's first letter
+         $taglink = ucfirst($tag);
+      } else if ($type == 2) // all word's first letter
+      {
         $taglink = str_replace(' ', '?', ucwords(str_replace('?', ' ', str_replace(' ', '/', ucwords(str_replace('/', ' ', str_replace(' ', '-', ucwords(str_replace('-', ' ', strtolower($tag))))))))));
-    } else // whole words
-    {
-        $taglink = strtoupper($tag);
+      } else // whole words
+      {
+         $taglink = strtoupper($tag);
+      }
     }
+    else $taglink = $tag;
     // Tag Description
     global $useo_tag_desc_list;
     require_once QA_INCLUDE_DIR . 'util/string.php';
