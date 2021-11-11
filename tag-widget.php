@@ -2,10 +2,9 @@
 
 class useo_tag_widget
 {
-
     function allow_template($template)
     {
-        return ($template == 'tag');
+        return $template === 'tag';
     }
 
     function allow_region($region)
@@ -21,7 +20,7 @@ class useo_tag_widget
         $tag = $parts[1];
 
         $description = qa_db_tagmeta_get($tag, 'description');
-        if (!(qa_opt('useo_tag_desc_sidebar_html'))) {
+        if (!qa_opt('useo_tag_desc_sidebar_html')) {
             $description = qa_html($description);
         }
         $editurlhtml = qa_path_html('tag-edit/' . $tag);
@@ -40,5 +39,4 @@ class useo_tag_widget
             echo '<A HREF="' . $editurlhtml . '">' . qa_lang_html('useo/create_desc_link') . '</A>';
         }
     }
-
 }
