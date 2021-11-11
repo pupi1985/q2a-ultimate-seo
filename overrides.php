@@ -12,17 +12,11 @@ function qa_q_request($questionid, $title)
     // URL Clean
     if (qa_opt('useo_url_cleanup')) { //clean url's title
         $words = qa_opt('useo_url_words_list');
-        $raw_title = $title;
-        // ~~ str_replace method
-        //$word_list = explode(',', $words);
-        //$title = str_replace($word_list, '', $raw_title);
-
-        // ~~preg_replace method with Q2A functions
         $word_list = qa_block_words_to_preg($words);
-        $title = trim(qa_block_words_replace($title, $word_list, ''));
+        $newTitle = trim(qa_block_words_replace($title, $word_list, ''));
 
-        if ((qa_strlen($title) == 0) && (qa_opt('useo_url_dont_make_empty'))) {
-            $title = $raw_title;
+        if (qa_strlen($newTitle) > 0 || !qa_opt('useo_url_dont_make_empty')) {
+            $title = $newTitle;
         }
     }
 
