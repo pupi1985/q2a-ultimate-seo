@@ -1,6 +1,3 @@
-<?php
-$useo_social_schema_page_type[qa_opt('useo_social_schema_page_type')] = 'selected=""';
-?>
 <h2 class="heading">Social Sharing Meta Tags</h2>
 <div class="useo-option-header-content">Social Sharing Meta Tags are used by social networks such as Facebook, Twitter, Google+ to generate content for shared pages link.</div>
 <h3 class="heading">Open Graph(FaceBook)</h3>
@@ -75,40 +72,6 @@ $useo_social_schema_page_type[qa_opt('useo_social_schema_page_type')] = 'selecte
 </div>
 
 <hr>
-<h3 class="heading">Google+ Schemas</h3>
-<div class="useo-option-header-content">if Open Graph is activated on the page they will be used by Google+. How ever adding "Schema.org's microdata" can give Google+ a better understanding of your page and if it will be used by Google+.</div>
-<div class="useo-option-container">
-	<div class="useo-option-detail">Enable Google+ Schema meta tags</div>
-	<div class="useo-option-content">
-		<div class="useo-checkbox-container">
-			<input id="useo_social_schema_enable" name="useo_social_schema_enable" <?php echo (qa_opt('useo_social_schema_enable') ? ' checked="" ' : ''); ?> class="useo-checkbox" type="checkbox" value="1">
-			<label for="useo_social_schema_enable"></label>
-		</div>
-	</div>
-	<div class="useo-option-extra-detail">By Activating this option Google+ Schema meta tags will be automatically be generated from question title and meta description</div>
-</div>
-<div class="useo-option-container">
-	<div class="useo-option-detail">Page Type</div>
-	<div class="useo-list-container">
-		<select class="useo-list" name="useo_social_schema_page_type">
-			<option <?php echo @$useo_social_schema_page_type[1]; ?> value="1">None</option>
-			<option <?php echo @$useo_social_schema_page_type[2]; ?> value="2">Question</option>
-			<option <?php echo @$useo_social_schema_page_type[3]; ?> value="3">Article</option>
-		</select>
-	</div>
-</div>
-<div id="useo-criteria-container" class="useo-option-container">
-	<div class="useo-option-detail">Google+ thumbnail image</div>
-	<div class="useo-option-content">
-		<div class="useo-text-container">
-			<input id="" class="useo-text" type="text" name="useo_social_gp_thumbnail" value="<?php echo qa_opt('useo_social_gp_thumbnail'); ?>">
-			<div class="useo-option-recommended"> Recommended image size is 250px × 250px </div>
-		</div>
-	</div>
-</div>
-
-
-<hr>
 <h3 class="heading">Meta Tag Editor</h3>
 <div class="useo-option-container">
 	<div class="useo-option-detail"> Enable Meta Tag editor in questions</div>
@@ -120,5 +83,3 @@ $useo_social_schema_page_type[qa_opt('useo_social_schema_page_type')] = 'selecte
 	</div>
 	<div class="useo-option-extra-detail">Enabling this option will add new fields to question page's sidebar to let you add custom meta descriptions.</div>
 </div>
-
-

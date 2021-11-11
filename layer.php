@@ -109,31 +109,6 @@ class qa_html_theme_layer extends qa_html_theme_base
                     $this->metas['tc-handler']['type'] = 'property="twitter:site"';
                 }
             }
-            if (qa_opt('useo_social_schema_enable')) { // Google+ schema
-                // title
-                $this->metas['gp-title']['content'] = $title;
-                $this->metas['gp-title']['type'] = 'itemprop="name"';
-                // description
-                $this->metas['gp-description']['content'] = $description;
-                $this->metas['gp-description']['type'] = 'itemprop="description"';
-                // type
-                $gp_type = qa_opt('useo_social_schema_page_type');
-                if ($gp_type == 2) {
-                    $gp_page_type = 'Question';
-                } else if ($gp_type == 3) {
-                    $gp_page_type = 'Article';
-                }
-                if ($this->template == 'question' && isset($gp_page_type)) {
-                    $this->metas['gp-type']['content'] = '';
-                    $this->metas['gp-type']['type'] = 'itemscope itemtype="http://schema.org/' . $gp_page_type . '"';
-                }
-                // description
-                $gp_image = qa_opt('useo_social_gp_thumbnail');
-                if (!empty($gp_image)) {
-                    $this->metas['gp-image']['content'] = $gp_image;
-                    $this->metas['gp-image']['type'] = 'itemprop="image"';
-                }
-            }
         }
         // category link titles
         $useo_cat_desc_map = array();

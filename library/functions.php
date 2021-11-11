@@ -131,9 +131,6 @@ function useo_reset_settings()
     qa_opt('useo_social_tc_desc_length', 120);
     qa_opt('useo_social_tc_image', '');
     qa_opt('useo_social_tc_handler', '');
-    qa_opt('useo_social_schema_enable', 1);
-    qa_opt('useo_social_schema_page_type', 1);
-    qa_opt('useo_social_gp_thumbnail', '');
     qa_opt('useo_social_enable_editor', 0);
 
     // Tags
