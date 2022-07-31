@@ -9,7 +9,7 @@ function qa_q_request($questionid, $title)
     if (qa_opt('useo_url_cleanup')) { //clean url's title
         $words = qa_opt('useo_url_words_list');
         $word_list = qa_block_words_to_preg($words);
-        $newTitle = trim(qa_block_words_replace($title, $word_list, ''));
+        $newTitle = trim(qa_block_words_replace($title ?? '', $word_list, ''));
 
         if (qa_strlen($newTitle) > 0 || !qa_opt('useo_url_dont_make_empty')) {
             $title = $newTitle;

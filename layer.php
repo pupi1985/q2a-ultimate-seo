@@ -158,7 +158,7 @@ class qa_html_theme_layer extends qa_html_theme_base
     function head_metas()
     {
         // Q2A Generates meta description and keywords, just adding title here
-        if (strlen(@$this->content['meta_title'])) {
+        if (strlen($this->content['meta_title'] ?? '')) {
             $this->output('<meta name="title" content="' . $this->content['meta_title'] . '"/>');
         }
         parent::head_metas();

@@ -64,7 +64,7 @@ class useo_category_widget
 
             require_once QA_INCLUDE_DIR . 'db/metas.php';
 
-            $description = qa_db_categorymeta_get($categoryid, 'useo_cat_description');
+            $description = (string)qa_db_categorymeta_get($categoryid, 'useo_cat_description');
             if (!(qa_opt('useo_cat_desc_format'))) {
                 $description = qa_html($description);
             }
@@ -72,7 +72,7 @@ class useo_category_widget
 
             $allowediting = !qa_user_permit_error('useo_cat_desc_permit_edit');
 
-            if (strlen($description)) {
+            if (strlen($description ?? '')) {
                 echo '<SPAN CLASS="entry-content qa-category-description">';
                 echo $description;
                 echo '</SPAN>';

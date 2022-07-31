@@ -34,7 +34,7 @@ class useo_scalable_xml_sitemaps
         if ($request == 'sitemap.xml') {
             $req = '';
         } else {
-            $req_str = substr($request, 8, strlen($request) - 12); // extract "X-Y-Z" from "sitemap-X-Y-Z.xml"
+            $req_str = substr($request, 8, strlen($request ?? '') - 12); // extract "X-Y-Z" from "sitemap-X-Y-Z.xml"
             $req = explode('-', $req_str);
         }
 

@@ -23,14 +23,19 @@ function useo_capitalize($capitalizationType, $string)
 /**
  * @param string $html
  *
- * @return array|string|string[]|null
+ * @return string
  */
 function updateRelAttributeFromHtml($html)
 {
     $relTypes = array(1 => 'nofollow', 2 => 'external', 3 => 'nofollow external');
     $linksList = json_decode(qa_opt('useo_link_relations'), true);
 
+    if (is_null($linksList)) {
+        return $html;
+    }
+
     $linkToRelMap = array_column($linksList, 'rel', 'url');
+
 
     $html = preg_replace_callback('/<a([^>]*?)\shref="([^"]*)"([^>]*)>/i', function ($matches) use ($relTypes, $linkToRelMap) {
         $domain = parse_url($matches[2], PHP_URL_HOST);
@@ -154,8 +159,8 @@ function useo_get_excerpt($str, $startPos = 0, $maxLength = 160)
 {
     require_once QA_INCLUDE_DIR . 'util/string.php';
 
-    if (qa_strlen($str) > $maxLength) {
-        $excerpt = qa_substr($str, $startPos, $maxLength - 3);
+    if (qa_strlen($str ?? '') > $maxLength) {
+        $excerpt = qa_substr($str ?? '', $startPos, $maxLength - 3);
 
         return rtrim($excerpt) . '...';
     } else {
@@ -194,7 +199,7 @@ function useo_get_current_category_slug()
 
     if ($explicitqa) {
         $useo_category_slug = array_slice($requestparts, 1);
-    } else if (strlen($requestparts[0]) > 0) {
+    } else if (strlen($requestparts[0] ?? '') > 0) {
         $useo_category_slug = $requestparts;
     } else {
         $useo_category_slug = false;

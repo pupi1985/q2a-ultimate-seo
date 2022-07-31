@@ -19,7 +19,7 @@ class useo_tag_widget
         $parts = explode('/', $request);
         $tag = $parts[1];
 
-        $description = qa_db_tagmeta_get($tag, 'description');
+        $description = (string)qa_db_tagmeta_get($tag, 'description');
         if (!qa_opt('useo_tag_desc_sidebar_html')) {
             $description = qa_html($description);
         }
@@ -27,7 +27,7 @@ class useo_tag_widget
 
         $allowediting = !qa_user_permit_error('useo_tag_desc_permit_edit');
 
-        if (strlen($description)) {
+        if (strlen($description ?? '')) {
             echo '<SPAN CLASS="entry-content qa-tag-description">';
             echo $description;
             echo '</SPAN>';
