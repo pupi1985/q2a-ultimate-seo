@@ -713,7 +713,7 @@ class qa_html_theme_layer extends qa_html_theme_base
             $useo_tag_desc_list = null;
 
             $plugin_tag_map = array();
-            foreach ($useo_tag_desc_map as &$value) {
+            foreach ($useo_tag_desc_map as $value) {
                 if ($value['title'] == 'title') {
                     $plugin_tag_map[$value['tag']]['title'] = $value['content'];
                 }
@@ -741,6 +741,7 @@ class qa_html_theme_layer extends qa_html_theme_base
                 $element = $html->createElement('img');
                 $element->setAttribute('src', $plugin_tag_map[$a->nodeValue]['icon']);
                 $element->setAttribute('class', 'qa-tag-img');
+                $element->setAttribute('alt', qa_html($a->nodeValue));
                 $element->setAttribute('width', qa_opt('useo_tag_desc_icon_width'));
                 $element->setAttribute('height', qa_opt('useo_tag_desc_icon_height'));
                 $a->insertBefore($element, $a->firstChild);
@@ -803,6 +804,7 @@ class qa_html_theme_layer extends qa_html_theme_base
                             $element = $html->createElement('img');
                             $element->setAttribute('src', $plugin_tag_map[$a->nodeValue]['icon']);
                             $element->setAttribute('class', 'qa-tag-img');
+                            $element->setAttribute('alt', qa_html($a->nodeValue));
                             $element->setAttribute('width', qa_opt('useo_tag_desc_icon_width'));
                             $element->setAttribute('height', qa_opt('useo_tag_desc_icon_height'));
                             $a->insertBefore($element, $a->firstChild);
