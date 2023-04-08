@@ -39,11 +39,12 @@ class useo_scalable_xml_sitemaps
         }
 
         $siteurl = qa_opt('site_url');
-        header('Content-type: text/xml; charset=utf-8');
+
         // Index Pages
         // Indexed all XML sitemaps for question's lists
         // example: sitemap.xml
         if ($req == '') {
+            $this->httpHeaderContentTypeXml();
             $this->sitemap_index_header();
             $q_sitemaps = qa_db_read_one_assoc(qa_db_query_sub(
                 "SELECT count(*) as total from ^posts WHERE type='Q'"
@@ -54,20 +55,28 @@ class useo_scalable_xml_sitemaps
                 $this->sitemap_index_output('sitemap-' . $i . '.xml');
             }
             $this->sitemap_index_footer();
+
+            return;
         }
         // Indexed all important XML sitemaps
         // example: sitemap-index.xml
         if ((count($req) == 1) && ($req[0] == 'index')) {
+            $this->httpHeaderContentTypeXml();
             $this->sitemap_index_header();
             $this->sitemap_index();
             $this->sitemap_index_footer();
+
+            return;
         }
         // Indexed all XML sitemaps, including categories question page
         // example: sitemap-index.xml
         if ((count($req) == 1) && ($req[0] == 'all')) {
+            $this->httpHeaderContentTypeXml();
             $this->sitemap_index_header();
             $this->sitemap_all();
             $this->sitemap_index_footer();
+
+            return;
         }
 
         //	Question pages
@@ -86,21 +95,28 @@ class useo_scalable_xml_sitemaps
                 $start, $count
             ));
 
-            if (count($questions)) {
-                $this->sitemap_header();
-                foreach ($questions as $question) {
-                    $this->sitemap_output(qa_q_request($question['postid'], $question['title']),
-                        0.1 + 0.9 * ($question['hotness'] - $hotstats['base']) / (1 + $hotstats['spread']));
-                }
-                $this->sitemap_footer();
+            if (empty($questions)) {
+                $this->httpHeaderNotFound();
+
+                return;
             }
+
+            $this->httpHeaderContentTypeXml();
+            $this->sitemap_header();
+            foreach ($questions as $question) {
+                $this->sitemap_output(qa_q_request($question['postid'], $question['title']),
+                    0.1 + 0.9 * ($question['hotness'] - $hotstats['base']) / (1 + $hotstats['spread']));
+            }
+            $this->sitemap_footer();
+
+            return;
         }
 
         //User pages
-        if (($req[0] == 'users') && (!QA_FINAL_EXTERNAL_USERS) && qa_opt('useo_sitemap_users_enable')) {
+        if (($req[0] == 'users') && !QA_FINAL_EXTERNAL_USERS && qa_opt('useo_sitemap_users_enable')) {
             // user's numbered sitemaps
             // example: sitemap-users-1.xml, sitemap-users-12.xml
-            if (isset($req[1]) && ((strval((int)$req[1])) == $req[1]) && ((int)qa_opt('useo_sitemap_users_count') != 0)) {
+            if (isset($req[1]) && strval((int)$req[1]) == $req[1] && (int)qa_opt('useo_sitemap_users_count') != 0) {
                 $count = qa_opt('useo_sitemap_users_count');
                 $start = (int)$req[1] * $count;
                 $users = qa_db_read_all_assoc(qa_db_query_sub(
@@ -108,28 +124,46 @@ class useo_scalable_xml_sitemaps
                     $start, $count
                 ));
 
-                if (count($users)) {
+                if (empty($users)) {
+                    $this->httpHeaderNotFound();
+
+                    return;
+                }
+
+                $this->httpHeaderContentTypeXml();
+
+                $this->sitemap_header();
+                foreach ($users as $user) {
+                    $this->sitemap_output('user/' . $user['handle'], 0.25);
+                }
+                $this->sitemap_footer();
+
+                return;
+            } else {
+                // All users sitemap
+                // example: sitemap-users.xml
+                if (!isset($req[1])) {
+                    $users = qa_db_read_all_assoc(qa_db_query_sub(
+                        "SELECT userid, handle FROM ^users ORDER BY userid"
+                    ));
+
+                    if (empty($users)) {
+                        $this->httpHeaderNotFound();
+
+                        return;
+                    }
+
+                    $this->httpHeaderContentTypeXml();
+
                     $this->sitemap_header();
                     foreach ($users as $user) {
                         $this->sitemap_output('user/' . $user['handle'], 0.25);
                     }
                     $this->sitemap_footer();
+
+                    return;
                 }
-            } else
-                // All users sitemap
-                // example: sitemap-users.xml
-                if (!(isset($req[1]))) {
-                    $users = qa_db_read_all_assoc(qa_db_query_sub(
-                        "SELECT userid, handle FROM ^users ORDER BY userid"
-                    ));
-                    if (count($users)) {
-                        $this->sitemap_header();
-                        foreach ($users as $user) {
-                            $this->sitemap_output('user/' . $user['handle'], 0.25);
-                        }
-                        $this->sitemap_footer();
-                    }
-                }
+            }
         }
 
         //	Tag pages
@@ -143,45 +177,76 @@ class useo_scalable_xml_sitemaps
                     "SELECT wordid, word, tagcount FROM ^words WHERE tagcount>0 ORDER BY wordid LIMIT #,#",
                     $start, $count
                 ));
-                if (count($tagwords)) {
-                    $this->sitemap_header();
-                    foreach ($tagwords as $tagword) {
-                        $this->sitemap_output('tag/' . $tagword['word'], 0.5 / (1 + (1 / $tagword['tagcount']))); // priority between 0.25 and 0.5 depending on tag frequency
-                    }
-                    $this->sitemap_footer();
+
+                if (empty($tagwords)) {
+                    $this->httpHeaderNotFound();
+
+                    return;
                 }
-            } else
+
+                $this->httpHeaderContentTypeXml();
+                $this->sitemap_header();
+                foreach ($tagwords as $tagword) {
+                    $this->sitemap_output('tag/' . $tagword['word'], 0.5 / (1 + (1 / $tagword['tagcount']))); // priority between 0.25 and 0.5 depending on tag frequency
+                }
+                $this->sitemap_footer();
+
+                return;
+            } else {
                 // link to all tags in sitemaps
                 // example: sitemap-tags.xml
-                if (!(isset($req[1]))) {
+                if (!isset($req[1])) {
                     $tagwords = qa_db_read_all_assoc(qa_db_query_sub(
                         "SELECT wordid, word, tagcount FROM ^words WHERE tagcount>0 ORDER BY wordid"
                     ));
+
+                    if (empty($tagwords)) {
+                        $this->httpHeaderNotFound();
+
+                        return;
+                    }
+
+                    $this->httpHeaderContentTypeXml();
+
                     if (count($tagwords)) {
                         $this->sitemap_header();
                         foreach ($tagwords as $tagword) {
                             $this->sitemap_output('tag/' . $tagword['word'], 0.5 / (1 + (1 / $tagword['tagcount']))); // priority between 0.25 and 0.5 depending on tag frequency
                         }
                         $this->sitemap_footer();
+
+                        return;
                     }
                 }
+            }
         }
 
         //	link to all category pages
-        if (($req[0] == 'category') && (!(isset($req[1]))) && qa_using_categories() && qa_opt('useo_sitemap_categories_enable')) {
+        if (($req[0] == 'category') && !isset($req[1]) && qa_using_categories() && qa_opt('useo_sitemap_categories_enable')) {
             $categories = qa_db_read_all_assoc(qa_db_query_sub(
                 "SELECT categoryid, backpath FROM ^categories WHERE qcount>0 ORDER BY categoryid"
             ));
-            if (count($categories)) {
-                $this->sitemap_header();
-                foreach ($categories as $category) {
-                    $this->sitemap_output('questions/' . implode('/', array_reverse(explode('/', $category['backpath']))), 0.5);
-                }
-                $this->sitemap_footer();
+
+            if (empty($categories)) {
+                $this->httpHeaderNotFound();
+
+                return;
             }
+
+            $this->httpHeaderContentTypeXml();
+
+            $this->sitemap_header();
+
+            foreach ($categories as $category) {
+                $this->sitemap_output('questions/' . implode('/', array_reverse(explode('/', $category['backpath']))), 0.5);
+            }
+
+            $this->sitemap_footer();
+
+            return;
         }
         //	sitemap for category questions
-        if (($req[0] == 'category') && (isset($req[1])) && qa_using_categories() && qa_opt('useo_sitemap_categoriy_q_enable')) {
+        if ($req[0] == 'category' && isset($req[1]) && qa_using_categories() && qa_opt('useo_sitemap_categoriy_q_enable')) {
             $hotstats = qa_db_read_one_assoc(qa_db_query_sub(
                 "SELECT MIN(hotness) AS base, MAX(hotness)-MIN(hotness) AS spread FROM ^posts WHERE type='Q'"
             ));
@@ -212,43 +277,65 @@ class useo_scalable_xml_sitemaps
                 ));
             }
 
-            if (count($questions)) {
-                $this->sitemap_header();
+            if (empty($questions)) {
+                $this->httpHeaderNotFound();
+
+                return;
             }
+
+            $this->httpHeaderContentTypeXml();
+
+            $this->sitemap_header();
+
             foreach ($questions as $question) {
                 $this->sitemap_output(qa_q_request($question['postid'], $question['title']),
                     0.1 + 0.9 * ($question['hotness'] - $hotstats['base']) / (1 + $hotstats['spread']));
             }
+
             $this->sitemap_footer();
+
+            return;
         }
 
         //	Pages in category browser
 
         if (qa_using_categories() && qa_opt('useo_sitemap_categories_enable')) {
-            $this->sitemap_output('categories', 0.5);
+            $hasOutput = false;
 
             $nextcategoryid = 0;
-            $this->sitemap_header();
             while (1) { // only find categories with a child
                 $categories = qa_db_read_all_assoc(qa_db_query_sub(
                     "SELECT parent.categoryid, parent.backpath FROM ^categories AS parent " .
                     "JOIN ^categories AS child ON child.parentid=parent.categoryid WHERE parent.categoryid>=# GROUP BY parent.categoryid LIMIT 100",
                     $nextcategoryid
                 ));
-                if (!count($categories)) {
+
+                if (empty($categories)) {
                     break;
                 }
+
+                // First time output. Note this could never be executed
+                if (!$hasOutput) {
+                    $this->httpHeaderContentTypeXml();
+                    $this->sitemap_header();
+
+                    $this->sitemap_output('categories', 0.5);
+
+                    $hasOutput = true;
+                }
+
                 foreach ($categories as $category) {
                     $this->sitemap_output('categories/' . implode('/', array_reverse(explode('/', $category['backpath']))), 0.5);
                     $nextcategoryid = max($nextcategoryid, $category['categoryid'] + 1);
                 }
             }
-            $this->sitemap_footer();
+
+            if ($hasOutput) {
+                $this->sitemap_footer();
+            } else {
+                $this->httpHeaderNotFound();
+            }
         }
-
-        //	Finish up...
-
-        return null;
     }
 
     function sitemap_all()
@@ -326,7 +413,6 @@ class useo_scalable_xml_sitemaps
     function sitemap_footer()
     {
         echo "</urlset>\n";
-        die();
     }
 
     function sitemap_index_header()
@@ -338,7 +424,6 @@ class useo_scalable_xml_sitemaps
     function sitemap_index_footer()
     {
         echo "</sitemapindex>\n";
-        die();
     }
 
     function sitemap_output($request, $priority)
@@ -356,4 +441,13 @@ class useo_scalable_xml_sitemaps
             "\t</sitemap>\n";
     }
 
+    private function httpHeaderContentTypeXml()
+    {
+        header('Content-type: text/xml; charset=utf-8');
+    }
+
+    private function httpHeaderNotFound()
+    {
+        header('HTTP/1.0 404 Not Found');
+    }
 }
