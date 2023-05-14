@@ -175,29 +175,26 @@ if( qa_opt('useo_sitemap_categories_enable') )
 {
 	echo '<p><a href="' . $siteurl .  'sitemap-category.xml">sitemap-category.xml' . '</a></p>';
 }
-if( qa_opt('useo_sitemap_categoriy_q_enable') )
-{
+if (qa_opt('useo_sitemap_categoriy_q_enable')) {
+    // category question's list
+    $sql =
+        'SELECT `categoryid` FROM `^categories` ' .
+        'WHERE `qcount` > 0 ' .
+        'ORDER BY `categoryid`';
+    $categoryIds = qa_db_read_all_values(qa_db_query_sub($sql));
 
-	$categories=qa_db_read_all_assoc(qa_db_query_sub(
-				"SELECT categoryid, backpath FROM ^categories WHERE qcount>0 ORDER BY categoryid"
-	));
-	foreach ($categories as $category){
-		$backpath = $category['backpath'];
+    foreach ($categoryIds as $categoryId) {
+        $sql =
+            'SELECT COUNT(*) FROM `^posts` ' .
+            'WHERE `type` = "Q" AND `categoryid` = #';
 
-		$qcount=qa_db_read_one_assoc(qa_db_query_sub(
-			'SELECT count(*) as total FROM ^posts WHERE ^posts.type=$
-			AND categoryid=(SELECT categoryid FROM ^categories WHERE ^categories.backpath=$ LIMIT 1)',
-			'Q', $backpath
-		));
+        $qcount = (int)qa_db_read_one_value(qa_db_query_sub($sql, $categoryId));
 
-		$category_slug = implode('-', array_reverse(explode('/', $category['backpath'])));
+        $count = (int)qa_opt('useo_sitemap_categoriy_q_count');
 
-		$count = (int) qa_opt('useo_sitemap_categoriy_q_count');
-		$cat_count = $count > 0 ? ceil($qcount['total'] / $count) : 0;
-		for ($i = 0; $i < $cat_count; $i++){
-			echo '<p><a href="' . $siteurl .  'sitemap-category-'. $category_slug . '-' . $i . '.xml">'. 'sitemap-category-' . $category_slug . '-' . $i . '.xml' . '</a></p>';
-		}
-	}
+        $cat_count = ceil($qcount / $count);
+        for ($i = 0; $i < $cat_count; $i++) {
+            echo sprintf("<p><a href=\"%ssitemap-category-%d-%d.xml\">sitemap-category-%d-%d.xml</a></p>", $siteurl, $categoryId, $i, $categoryId, $i);
+        }
+    }
 }
-
-?>

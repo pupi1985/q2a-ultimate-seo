@@ -38,8 +38,6 @@ class useo_scalable_xml_sitemaps
             $req = explode('-', $req_str);
         }
 
-        $siteurl = qa_opt('site_url');
-
         // Index Pages
         // Indexed all XML sitemaps for question's lists
         // example: sitemap.xml
@@ -82,7 +80,7 @@ class useo_scalable_xml_sitemaps
         //	Question pages
         // numbered question sitenaps
         // example: sitemap-1.xml, sitemap-12.xml
-        if ((count($req) == 1) && ((strval((int)$req[0])) == $req[0])) {
+        if (count($req) == 1 && strval((int)$req[0]) == $req[0]) {
             $hotstats = qa_db_read_one_assoc(qa_db_query_sub(
                 "SELECT MIN(hotness) AS base, MAX(hotness)-MIN(hotness) AS spread FROM ^posts WHERE type='Q'"
             ));
@@ -222,9 +220,9 @@ class useo_scalable_xml_sitemaps
         }
 
         //	link to all category pages
-        if (($req[0] == 'category') && !isset($req[1]) && qa_using_categories() && qa_opt('useo_sitemap_categories_enable')) {
+        if ($req[0] == 'category' && !isset($req[1]) && qa_using_categories() && qa_opt('useo_sitemap_categories_enable')) {
             $categories = qa_db_read_all_assoc(qa_db_query_sub(
-                "SELECT categoryid, backpath FROM ^categories WHERE qcount>0 ORDER BY categoryid"
+                "SELECT categoryid, backpath FROM ^categories WHERE qcount > 0 ORDER BY categoryid"
             ));
 
             if (empty($categories)) {
@@ -245,37 +243,57 @@ class useo_scalable_xml_sitemaps
 
             return;
         }
-        //	sitemap for category questions
-        if ($req[0] == 'category' && isset($req[1]) && qa_using_categories() && qa_opt('useo_sitemap_categoriy_q_enable')) {
-            $hotstats = qa_db_read_one_assoc(qa_db_query_sub(
-                "SELECT MIN(hotness) AS base, MAX(hotness)-MIN(hotness) AS spread FROM ^posts WHERE type='Q'"
-            ));
 
-            if (count($req) >= 3) { //because: "category-x-x-x-x-1" | 1 category + 1 sount + at least 1 category = 3
-                // link to questions in a category or sub category
-                // example: sitemap-category-RootCat-SubCat-2.xml
-                // it's always numbered, "sitemap-category-RootCat-SubCat.xml" is NOT ALLOWED
-                $slug_list = array_splice($req, 1, -1);
-                $slug = implode("/", array_reverse($slug_list));
-                $count = qa_opt('useo_sitemap_categoriy_q_count');
-                $start = (int)$req[count($req) - 1] * $count;
-                $questions = qa_db_read_all_assoc(qa_db_query_sub(
-                    'SELECT postid, title, hotness FROM ^posts WHERE ^posts.type=$
-						AND categoryid=(SELECT categoryid FROM ^categories WHERE ^categories.backpath=$ LIMIT 1) 
-						ORDER BY ^posts.created DESC LIMIT #,#',
-                    'Q', $slug, $start, $count
-                ));
-            } else {
-                // link to all questions in a category
-                // example: sitemap-category-RootCat.xml
-                $slug = $req[1];
-                $questions = qa_db_read_all_assoc(qa_db_query_sub(
-                    "SELECT postid, title, hotness FROM ^posts WHERE ^posts.type=$
-						AND categoryid=(SELECT categoryid FROM ^categories WHERE ^categories.backpath=$ LIMIT 1) 
-						ORDER BY ^posts.created DESC",
-                    'Q', $slug
-                ));
+        // sitemap for category questions
+        // category-123.xml => All questions in category 123
+        // category-123-5.xml => Questions in page 5 of the category 123
+        if ($req[0] == 'category' && isset($req[1]) && qa_using_categories() && qa_opt('useo_sitemap_categoriy_q_enable')) {
+            if (filter_var($req[1], FILTER_VALIDATE_INT) === false) {
+                $this->httpHeaderNotFound();
+
+                return;
             }
+
+            $categoryId = (int)$req[1];
+
+            $sql =
+                'SELECT postid, title, hotness FROM ^posts WHERE ^posts.type = "Q" ' .
+                'AND categoryid = # ' .
+                'ORDER BY ^posts.created DESC';
+
+            switch (count($req)) {
+                // Look for all questions in category
+                case 2:
+                    $questions = qa_db_read_all_assoc(qa_db_query_sub($sql, $categoryId));
+
+                    break;
+                // Look for questions in category and page
+                case 3:
+                    if (filter_var($req[2], FILTER_VALIDATE_INT) === false) {
+                        $this->httpHeaderNotFound();
+
+                        return;
+                    }
+
+                    $page = (int)$req[2];
+
+                    $sql .= ' LIMIT #, #';
+
+                    $count = qa_opt('useo_sitemap_categoriy_q_count');
+                    $start = $page * $count;
+
+                    $questions = qa_db_read_all_assoc(qa_db_query_sub($sql, $categoryId, $start, $count));
+
+                    break;
+                default:
+                    $this->httpHeaderNotFound();
+
+                    return;
+            }
+
+            $hotstats = qa_db_read_one_assoc(qa_db_query_sub(
+                'SELECT MIN(hotness) AS base, MAX(hotness)-MIN(hotness) AS spread FROM ^posts WHERE type = "Q"'
+            ));
 
             if (empty($questions)) {
                 $this->httpHeaderNotFound();
@@ -342,24 +360,26 @@ class useo_scalable_xml_sitemaps
     {
         // all indexed sitemaps
         $this->sitemap_index();
+
         // category question's list
-        $categories = qa_db_read_all_assoc(qa_db_query_sub(
-            "SELECT categoryid, backpath FROM ^categories WHERE qcount>0 ORDER BY categoryid"
-        ));
-        foreach ($categories as $category) {
-            $backpath = $category['backpath'];
+        $sql =
+            'SELECT `categoryid` FROM `^categories` ' .
+            'WHERE `qcount` > 0 ' .
+            'ORDER BY `categoryid`';
+        $categoryIds = qa_db_read_all_values(qa_db_query_sub($sql));
 
-            $count = qa_opt('useo_sitemap_categoriy_q_count');
-            $qcount = qa_db_read_one_assoc(qa_db_query_sub(
-                'SELECT count(*) as total FROM ^posts WHERE ^posts.type=$
-					AND categoryid=(SELECT categoryid FROM ^categories WHERE ^categories.backpath=$ LIMIT 1)',
-                'Q', $backpath
-            ));
+        foreach ($categoryIds as $categoryId) {
+            $sql =
+                'SELECT COUNT(*) FROM `^posts` ' .
+                'WHERE `type` = "Q" AND `categoryid` = #';
 
-            $category_slug = implode('-', array_reverse(explode('/', $category['backpath'])));
-            $cat_count = ceil($qcount['total'] / $count);
+            $qcount = (int)qa_db_read_one_value(qa_db_query_sub($sql, $categoryId));
+
+            $count = (int)qa_opt('useo_sitemap_categoriy_q_count');
+
+            $cat_count = ceil($qcount / $count);
             for ($i = 0; $i < $cat_count; $i++) {
-                $this->sitemap_index_output('sitemap-category-' . $category_slug . '-' . $i . '.xml');
+                $this->sitemap_index_output(sprintf("sitemap-category-%d-%d.xml", $categoryId, $i));
             }
         }
     }
