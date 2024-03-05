@@ -358,7 +358,7 @@ class qa_html_theme_layer extends qa_html_theme_base
                     $req = $requestParts;
                     $user = $req[1];
                     $search = array('%site-title%', '%user-x%', '%current-user%');
-                    $replace = array(qa_opt('site_title'), qa_lang_html_sub('main/results_for_x', qa_html($user)), $user);
+                    $replace = array(qa_opt('site_title'), qa_lang_html_sub('profile/user_x', qa_html($user)), $user);
                     $title = str_replace($search, $replace, $title_template);
                 }
                 break;
