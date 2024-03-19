@@ -728,7 +728,7 @@ class qa_html_theme_layer extends qa_html_theme_base
 
         $html = new DOMDocument();
         libxml_use_internal_errors(true);
-        $html->loadHTML(mb_convert_encoding($taghtml, 'HTML-ENTITIES', 'UTF-8'));
+        $html->loadHTML(htmlentities($taghtml));
         libxml_use_internal_errors(false);
 
         $nodeList = $html->getElementsByTagName('a');
@@ -794,7 +794,7 @@ class qa_html_theme_layer extends qa_html_theme_base
                 $html = new DOMDocument();
                 foreach ($ranking['items'] as &$item) {
                     libxml_use_internal_errors(true);
-                    $html->loadHTML(mb_convert_encoding($item['label'], 'HTML-ENTITIES', 'UTF-8'));
+                    $html->loadHTML(htmlentities($item['label']));
                     libxml_use_internal_errors(false);
                     foreach ($html->getElementsByTagName('a') as $a) {
                         if (!empty($plugin_tag_map[$a->nodeValue]['title'])) {

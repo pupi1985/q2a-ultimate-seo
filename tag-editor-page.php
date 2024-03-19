@@ -13,7 +13,7 @@ class useo_tag_editor_page
     function process_request($request)
     {
         $parts = explode('/', $request);
-        $tag = $parts[1];
+        $tag = $parts[1] ?? '';
 
         $qa_content = qa_content_prepare();
         $qa_content['title'] = qa_lang_html_sub('useo/edit_desc_for_x', qa_html($tag));

@@ -41,7 +41,7 @@ function qa_tag_html($tag, $microdata = false, $favorited = false)
     // Tag Description
     global $useo_tag_desc_list;
 
-    $taglc = qa_strtolower($tag);
+    $taglc = qa_strtolower($tag ?? '');
     $useo_tag_desc_list[$taglc] = true;
 
     $url = qa_path_html('tag/' . $taglink);
