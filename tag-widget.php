@@ -20,7 +20,7 @@ class useo_tag_widget
         $tag = $parts[1];
 
         $description = (string)qa_db_tagmeta_get($tag, 'description');
-        if (!qa_opt('useo_tag_desc_sidebar_html')) {
+        if (!qa_opt('useo_tag_desc_format')) {
             $description = qa_html($description);
         }
         $editurlhtml = qa_path_html('tag-edit/' . $tag);
