@@ -8,6 +8,8 @@ class qa_html_theme_layer extends qa_html_theme_base
     private $metas = array();
     private $social_metas = array();
 
+    private $plugin_tag_map = array();
+
     function doctype()
     {
         parent::doctype();
@@ -698,56 +700,10 @@ class qa_html_theme_layer extends qa_html_theme_base
 
     function post_tag_item($taghtml, $class)
     {
-        require_once QA_INCLUDE_DIR . 'util/string.php';
-        global
-        $useo_tag_desc_list, // Already filled in qa-tag-desc-overrides.php  -  All tags used in this page are listed in this array
-        $plugin_tag_map;       // here it will be filled with tag's meta descriptions
-        if (!empty($useo_tag_desc_list)) {
-            $result = qa_db_query_sub(
-                'SELECT tag, title, content FROM ^tagmetas WHERE tag IN ($)',
-                array_keys($useo_tag_desc_list)
-            );
+        $this->refreshPendingTags();
 
-            $useo_tag_desc_map = qa_db_read_all_assoc($result);
+        $taghtml = $this->getTagHtml($taghtml);
 
-            $useo_tag_desc_list = null;
-
-            $plugin_tag_map = array();
-            foreach ($useo_tag_desc_map as $value) {
-                if ($value['title'] == 'title') {
-                    $plugin_tag_map[$value['tag']]['title'] = $value['content'];
-                }
-                if ($value['title'] == 'description') {
-                    $plugin_tag_map[$value['tag']]['description'] = $value['content'];
-                }
-                if ($value['title'] == 'icon') {
-                    $plugin_tag_map[$value['tag']]['icon'] = $value['content'];
-                }
-            }
-        }
-
-        $html = new DOMDocument();
-        libxml_use_internal_errors(true);
-        $html->loadHTML(htmlentities($taghtml));
-        libxml_use_internal_errors(false);
-
-        $nodeList = $html->getElementsByTagName('a');
-        if ($nodeList->length > 0) {
-            $a = $nodeList->item(0);
-            if (!empty($plugin_tag_map[$a->nodeValue]['title'])) {
-                $a->setAttribute('title', $plugin_tag_map[$a->nodeValue]['title']);
-            }
-            if (!empty($plugin_tag_map[$a->nodeValue]['icon'])) {
-                $element = $html->createElement('img');
-                $element->setAttribute('src', $plugin_tag_map[$a->nodeValue]['icon']);
-                $element->setAttribute('class', 'qa-tag-img');
-                $element->setAttribute('alt', qa_html($a->nodeValue));
-                $element->setAttribute('width', qa_opt('useo_tag_desc_icon_width'));
-                $element->setAttribute('height', qa_opt('useo_tag_desc_icon_height'));
-                $a->insertBefore($element, $a->firstChild);
-            }
-            $taghtml = $html->saveHTML($a);
-        }
         parent::post_tag_item($taghtml, $class);
     }
 
@@ -767,53 +723,78 @@ class qa_html_theme_layer extends qa_html_theme_base
 
     function ranking($ranking)
     {
-        if ($this->template == 'tags') {
-            global $useo_tag_desc_list; // Already filled in qa-tag-desc-overrides.php  -  All tags used in this page are listed in this array
+        if ($this->template === 'tags') {
+            $this->refreshPendingTags();
 
-            if (!empty($useo_tag_desc_list)) {
-                // Get all tag meta in this query
-                $result = qa_db_query_sub(
-                    'SELECT tag, title, content FROM ^tagmetas WHERE tag IN ($)',
-                    array_keys($useo_tag_desc_list)
-                );
-                $useo_tag_desc_map = qa_db_read_all_assoc($result);
-                $useo_tag_desc_list = null;
-                $plugin_tag_map = array();
-                foreach ($useo_tag_desc_map as &$value) {
-                    if ($value['title'] == 'title') {
-                        $plugin_tag_map[$value['tag']]['title'] = $value['content'];
-                    }
-                    if ($value['title'] == 'description') {
-                        $plugin_tag_map[$value['tag']]['description'] = $value['content'];
-                    }
-                    if ($value['title'] == 'icon') {
-                        $plugin_tag_map[$value['tag']]['icon'] = $value['content'];
-                    }
-                }
-                // add title and icon to each tag
-                $html = new DOMDocument();
-                foreach ($ranking['items'] as &$item) {
-                    libxml_use_internal_errors(true);
-                    $html->loadHTML(htmlentities($item['label']));
-                    libxml_use_internal_errors(false);
-                    foreach ($html->getElementsByTagName('a') as $a) {
-                        if (!empty($plugin_tag_map[$a->nodeValue]['title'])) {
-                            $a->setAttribute('title', $plugin_tag_map[$a->nodeValue]['title']);
-                        }
-                        if (!empty($plugin_tag_map[$a->nodeValue]['icon'])) {
-                            $element = $html->createElement('img');
-                            $element->setAttribute('src', $plugin_tag_map[$a->nodeValue]['icon']);
-                            $element->setAttribute('class', 'qa-tag-img');
-                            $element->setAttribute('alt', qa_html($a->nodeValue));
-                            $element->setAttribute('width', qa_opt('useo_tag_desc_icon_width'));
-                            $element->setAttribute('height', qa_opt('useo_tag_desc_icon_height'));
-                            $a->insertBefore($element, $a->firstChild);
-                        }
-                    }
-                    $item['label'] = $html->saveHTML();
-                }
+            foreach ($ranking['items'] as &$item) {
+                $item['label'] = $this->getTagHtml($item['label']);
             }
         }
         parent::ranking($ranking);
+    }
+
+    /**
+     * @param string $taghtml
+     *
+     * @return string
+     */
+    private function getTagHtml($taghtml)
+    {
+        try {
+            $html = new DOMDocument();
+            libxml_use_internal_errors(true);
+            $html->loadHTML($taghtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            libxml_use_internal_errors(false);
+
+            $nodeList = $html->getElementsByTagName('a');
+            if ($nodeList->length > 0) {
+                $a = $nodeList->item(0);
+                if (!empty($this->plugin_tag_map[$a->nodeValue]['title'])) {
+                    $a->setAttribute('title', $this->plugin_tag_map[$a->nodeValue]['title']);
+                }
+                if (!empty($this->plugin_tag_map[$a->nodeValue]['icon'])) {
+                    $element = $html->createElement('img');
+                    $element->setAttribute('src', $this->plugin_tag_map[$a->nodeValue]['icon']);
+                    $element->setAttribute('class', 'qa-tag-img');
+                    $element->setAttribute('alt', qa_html($a->nodeValue));
+                    $element->setAttribute('width', qa_opt('useo_tag_desc_icon_width'));
+                    $element->setAttribute('height', qa_opt('useo_tag_desc_icon_height'));
+                    $a->insertBefore($element, $a->firstChild);
+                }
+                $taghtml = $html->saveHTML($a);
+            }
+        } catch (Exception $e) {
+        }
+
+        return $taghtml;
+    }
+
+    private function refreshPendingTags()
+    {
+        global $useo_tag_desc_list;
+
+        if (empty($useo_tag_desc_list)) {
+            return;
+        }
+
+        $result = qa_db_query_sub(
+            'SELECT tag, title, content FROM ^tagmetas WHERE tag IN ($)',
+            array_keys($useo_tag_desc_list)
+        );
+
+        $useo_tag_desc_map = qa_db_read_all_assoc($result);
+        $useo_tag_desc_list = null;
+        $this->plugin_tag_map = array();
+        foreach ($useo_tag_desc_map as $value) {
+            if ($value['title'] == 'title') {
+                $this->plugin_tag_map[$value['tag']]['title'] = $value['content'];
+            }
+            if ($value['title'] == 'description') {
+                $this->plugin_tag_map[$value['tag']]['description'] = $value['content'];
+            }
+            if ($value['title'] == 'icon') {
+                $this->plugin_tag_map[$value['tag']]['icon'] = $value['content'];
+            }
+        }
     }
 }
