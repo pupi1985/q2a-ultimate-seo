@@ -6,6 +6,8 @@ function useo_capitalize($capitalizationType, $string)
         case 1: // first word's first letter
             return ucfirst($string);
         case 2: // all word's first letter
+            require_once QA_INCLUDE_DIR . 'util/string.php';
+
             $words = qa_string_to_words($string, true, true);
             $result = '';
             foreach ($words as $word) {

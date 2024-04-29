@@ -740,33 +740,44 @@ class qa_html_theme_layer extends qa_html_theme_base
      */
     private function getTagHtml($taghtml)
     {
-        try {
-            $html = new DOMDocument();
-            libxml_use_internal_errors(true);
-            $html->loadHTML($taghtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-            libxml_use_internal_errors(false);
+        // For qa_strtolower()
+        require_once QA_INCLUDE_DIR . 'util/string.php';
 
-            $nodeList = $html->getElementsByTagName('a');
-            if ($nodeList->length > 0) {
-                $a = $nodeList->item(0);
-                if (!empty($this->plugin_tag_map[$a->nodeValue]['title'])) {
-                    $a->setAttribute('title', $this->plugin_tag_map[$a->nodeValue]['title']);
-                }
-                if (!empty($this->plugin_tag_map[$a->nodeValue]['icon'])) {
-                    $element = $html->createElement('img');
-                    $element->setAttribute('src', $this->plugin_tag_map[$a->nodeValue]['icon']);
-                    $element->setAttribute('class', 'qa-tag-img');
-                    $element->setAttribute('alt', qa_html($a->nodeValue));
-                    $element->setAttribute('width', qa_opt('useo_tag_desc_icon_width'));
-                    $element->setAttribute('height', qa_opt('useo_tag_desc_icon_height'));
-                    $a->insertBefore($element, $a->firstChild);
-                }
-                $taghtml = $html->saveHTML($a);
-            }
-        } catch (Exception $e) {
+        // All below gets dirty to avoid loading an HTML parser
+
+        // Make sure we have a link to start with
+        if (substr($taghtml, 0, 2) !== '<a') {
+            return $taghtml;
         }
 
-        return $taghtml;
+        $parts = explode('>', $taghtml);
+
+        // Make sure it is split in 3 pieces, as the Q2A core outputs
+        if (count($parts) !== 3) {
+            return $taghtml;
+        }
+
+        // Remove the "/a>"
+        $tag = substr($parts[1], 0, -3);
+
+        $tag = qa_strtolower($tag);
+
+        if (!empty($this->plugin_tag_map[$tag]['title'])) {
+            $parts[0] .= sprintf(' title="%s"', qa_html($this->plugin_tag_map[$tag]['title']));
+        }
+
+        if (!empty($this->plugin_tag_map[$tag]['icon'])) {
+            $img = sprintf(
+                '<img src="%s" class="qa-tag-img" alt="%s" width="%s" height="%s">',
+                $this->plugin_tag_map[$tag]['icon'],
+                qa_html($tag),
+                qa_opt('useo_tag_desc_icon_width'),
+                qa_opt('useo_tag_desc_icon_height')
+            );
+            $parts[1] = $img . $parts[1];
+        }
+
+        return implode('>', $parts);
     }
 
     private function refreshPendingTags()

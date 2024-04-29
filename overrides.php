@@ -31,12 +31,12 @@ function qa_q_request($questionid, $title)
 
 function qa_tag_html($tag, $microdata = false, $favorited = false)
 {
-    // For qa_string_to_words(), qa_strtolower()
+    // For qa_strtolower()
     require_once QA_INCLUDE_DIR . 'util/string.php';
 
     // URL Customization
     $type = (int)qa_opt('useo_url_tag_uppercase_type');
-    $taglink = useo_capitalize($type, $tag);
+    $tag = useo_capitalize($type, $tag);
 
     // Tag Description
     global $useo_tag_desc_list;
@@ -44,11 +44,7 @@ function qa_tag_html($tag, $microdata = false, $favorited = false)
     $taglc = qa_strtolower($tag ?? '');
     $useo_tag_desc_list[$taglc] = true;
 
-    $url = qa_path_html('tag/' . $taglink);
-    $attrs = $microdata ? ' rel="tag"' : '';
-    $class = $favorited ? ' qa-tag-favorited' : '';
-
-    return '<a href="' . $url . '"' . $attrs . ' class="qa-tag-link' . $class . '">' . qa_html($tag) . '</a>';
+    return qa_tag_html_base($tag, $microdata, $favorited);
 }
 
 function qa_sanitize_html($html, $linksnewwindow = false, $storage = false)
